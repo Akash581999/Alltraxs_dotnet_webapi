@@ -212,3 +212,4 @@ C:\Users\akash2.kumar\Desktop\Alltraxs_dotnet_webapi\obj\Debug\net6.0\refint\COM
 C:\Users\akash2.kumar\Desktop\Alltraxs_dotnet_webapi\obj\Debug\net6.0\COMMON_PROJECT_STRUCTURE_API.pdb
 C:\Users\akash2.kumar\Desktop\Alltraxs_dotnet_webapi\obj\Debug\net6.0\COMMON_PROJECT_STRUCTURE_API.genruntimeconfig.cache
 C:\Users\akash2.kumar\Desktop\Alltraxs_dotnet_webapi\obj\Debug\net6.0\ref\COMMON_PROJECT_STRUCTURE_API.dll
+C:\Users\akash2.kumar\Desktop\Alltraxs_dotnet_webapi\obj\Debug\net6.0\COMMON_PROJECT_STRUCTURE_API.sourcelink.json
