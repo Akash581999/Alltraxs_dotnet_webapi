@@ -41,12 +41,13 @@ namespace COMMON_PROJECT_STRUCTURE_API.services
 
                     if (insertId != 0)
                     {
-                        resData.eventID = req.eventID;
+                        // resData.eventID = req.eventID;
                         resData.rData["rCode"] = 0;
                         resData.rData["rMessage"] = "Thank you for your response";
                     }
                     else
                     {
+                        resData.eventID = req.eventID;
                         resData.rData["rCode"] = 1;
                         resData.rData["rMessage"] = "Failed to submit feedback";
                     }

@@ -1,6 +1,7 @@
 using System.IO;
 using System.Text;
 using System.Text.Json;
+using System.IdentityModel.Tokens.Jwt;
 using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Authorization;
@@ -21,34 +22,19 @@ WebHost.CreateDefaultBuilder(args)
         services.AddSingleton<resetPassword>();
         services.AddSingleton<deleteProfile>();
         services.AddSingleton<contactUs>();
+        services.AddSingleton<playlists>();
 
         services.AddAuthorization();
         services.AddControllers();
         services.AddCors();
-
-        // Configure JWT authentication
-        services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-            .AddJwtBearer(options =>
-            {
-                options.TokenValidationParameters = new TokenValidationParameters
-                {
-                    ValidateIssuer = true,
-                    ValidateAudience = true,
-                    ValidateIssuerSigningKey = true,
-                    ValidIssuer = appsettings["jwt_config:Issuer"].ToString(),
-                    ValidAudience = appsettings["jwt_config:Audience"].ToString(),
-                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(appsettings["jwt_config:Key"].ToString())),
-                };
-            });
+        services.AddAuthentication("SourceJWT").AddScheme<SourceJwtAuthenticationSchemeOptions, SourceJwtAuthenticationHandler>("SourceJWT", options =>
+           {
+               options.SecretKey = appsettings["jwt_config:Key"].ToString();
+               options.ValidIssuer = appsettings["jwt_config:Issuer"].ToString();
+               options.ValidAudience = appsettings["jwt_config:Audience"].ToString();
+               options.Subject = appsettings["jwt_config:Subject"].ToString();
+           });
     })
-    //     services.AddAuthentication("SourceJWT").AddScheme<SourceJwtAuthenticationSchemeOptions, SourceJwtAuthenticationHandler>("SourceJWT", options =>
-    //        {
-    //            options.SecretKey = appsettings["jwt_config:Key"].ToString();
-    //            options.ValidIssuer = appsettings["jwt_config:Issuer"].ToString();
-    //            options.ValidAudience = appsettings["jwt_config:Audience"].ToString();
-    //            options.Subject = appsettings["jwt_config:Subject"].ToString();
-    //        });
-    // })
     .Configure(app =>
     {
         app.UseCors(options =>
@@ -57,7 +43,6 @@ WebHost.CreateDefaultBuilder(args)
         app.UseRouting();
         app.UseStaticFiles();
 
-        // Use authentication and authorization middleware
         app.UseAuthentication();
         app.UseAuthorization();
 
@@ -70,6 +55,7 @@ WebHost.CreateDefaultBuilder(args)
             var resetPassword = endpoints.ServiceProvider.GetService<resetPassword>();
             var deleteProfile = endpoints.ServiceProvider.GetRequiredService<deleteProfile>();
             var contactUs = endpoints.ServiceProvider.GetRequiredService<contactUs>();
+            var playlists = endpoints.ServiceProvider.GetRequiredService<playlists>();
 
             endpoints.MapPost("/login",
             [AllowAnonymous] async (HttpContext http) =>
@@ -97,6 +83,7 @@ WebHost.CreateDefaultBuilder(args)
                 if (rData.eventID == "1003") // Update
                     await http.Response.WriteAsJsonAsync(await editProfile.EditProfile(rData));
             });
+
             endpoints.MapPut("changePassword",
             [AllowAnonymous] async (HttpContext http) =>
             {
@@ -105,6 +92,7 @@ WebHost.CreateDefaultBuilder(args)
                 if (rData.eventID == "1004") // Update
                     await http.Response.WriteAsJsonAsync(await changePassword.ChangePassword(rData));
             });
+
             endpoints.MapPut("resetPassword",
             [AllowAnonymous] async (HttpContext http) =>
             {
@@ -113,6 +101,7 @@ WebHost.CreateDefaultBuilder(args)
                 if (rData.eventID == "1005") // Update
                     await http.Response.WriteAsJsonAsync(await resetPassword.ResetPassword(rData));
             });
+
             endpoints.MapDelete("deleteProfile",
             [AllowAnonymous] async (HttpContext http) =>
             {
@@ -121,6 +110,7 @@ WebHost.CreateDefaultBuilder(args)
                 if (rData.eventID == "1006") // Delete
                     await http.Response.WriteAsJsonAsync(await deleteProfile.DeleteProfile(rData));
             });
+
             endpoints.MapPost("contactUs",
             [AllowAnonymous] async (HttpContext http) =>
             {
@@ -130,8 +120,61 @@ WebHost.CreateDefaultBuilder(args)
                     await http.Response.WriteAsJsonAsync(await contactUs.ContactUs(rData));
             }).RequireAuthorization();
 
+            endpoints.MapPost("/playlists", async context =>
+            {
+                var body = await new StreamReader(context.Request.Body).ReadToEndAsync();
+                var rData = JsonSerializer.Deserialize<requestData>(body);
+
+                if (rData.eventID == "1008")
+                {
+                    var result = await playlists.GetPlaylist(rData);
+                    await context.Response.WriteAsJsonAsync(result);
+                }
+                else if (rData.eventID == "addPlaylist")
+                {
+                    var result = await playlists.AddPlaylist(rData);
+                    await context.Response.WriteAsJsonAsync(result);
+                }
+                else if (rData.eventID == "updatePlaylist")
+                {
+                    var result = await playlists.UpdatePlaylist(rData);
+                    await context.Response.WriteAsJsonAsync(result);
+                }
+                else if (rData.eventID == "deletePlaylist")
+                {
+                    var result = await playlists.DeletePlaylist(rData);
+                    await context.Response.WriteAsJsonAsync(result);
+                }
+            }).RequireAuthorization();
+            endpoints.MapGet("/playlists/{id}", async context =>
+            {
+                string playlistId = context.Request.RouteValues["id"] as string;
+                var rData = new requestData { addInfo = new Dictionary<string, object> { { "id", playlistId } } };
+
+                var result = await playlists.GetPlaylist(rData);
+                await context.Response.WriteAsJsonAsync(result);
+            }).RequireAuthorization();
+            endpoints.MapPut("/playlists/{id}", async context =>
+            {
+                string playlistId = context.Request.RouteValues["id"] as string;
+                var body = await new StreamReader(context.Request.Body).ReadToEndAsync();
+                var rData = JsonSerializer.Deserialize<requestData>(body);
+                rData.addInfo["id"] = playlistId;
+
+                var result = await playlists.UpdatePlaylist(rData);
+                await context.Response.WriteAsJsonAsync(result);
+            }).RequireAuthorization();
+            endpoints.MapDelete("/playlists/{id}", async context =>
+            {
+                string playlistId = context.Request.RouteValues["id"] as string;
+                var rData = new requestData { addInfo = new Dictionary<string, object> { { "id", playlistId } } };
+
+                var result = await playlists.DeletePlaylist(rData);
+                await context.Response.WriteAsJsonAsync(result);
+            }).RequireAuthorization();
+
             endpoints.MapGet("/bing",
-                 async c => await c.Response.WriteAsJsonAsync("{'Name':'Akash','Age':'24','Project':'COMMON_PROJECT_STRUCTURE_API'}"));
+                 async c => await c.Response.WriteAsJsonAsync("{'Name':'Akash','Age':'24','Project':'AllTraxs_Music_Webapp'}"));
         });
     }).Build().Run();
 
