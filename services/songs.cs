@@ -16,6 +16,8 @@ namespace COMMON_PROJECT_STRUCTURE_API.services
         public async Task<responseData> PostSong(requestData rData)
         {
             responseData resData = new responseData();
+            resData.eventID = rData.eventID;
+            resData.rData["rCode"] = 0;
             try
             {
                 var query = @"SELECT * FROM pc_student.Alltraxs_Songs WHERE title=@title";
@@ -61,8 +63,9 @@ namespace COMMON_PROJECT_STRUCTURE_API.services
             }
             catch (Exception ex)
             {
+                resData.rStatus = 404;
                 resData.rData["rCode"] = 1;
-                resData.rData["rMessage"] = "An error occurred: " + ex.Message;
+                resData.rData["rMessage"] = $"Error: {ex.Message}";
             }
             return resData;
         }
@@ -70,6 +73,8 @@ namespace COMMON_PROJECT_STRUCTURE_API.services
         public async Task<responseData> DeleteSong(requestData req)
         {
             responseData resData = new responseData();
+            resData.eventID = req.eventID;
+            resData.rData["rCode"] = 0;
             try
             {
                 MySqlParameter[] para = new MySqlParameter[]
@@ -78,8 +83,8 @@ namespace COMMON_PROJECT_STRUCTURE_API.services
                 };
 
                 var deleteSql = $"DELETE FROM pc_student.Alltraxs_Songs WHERE SongId = @SongId";
-                var rowsAffected = ds.ExecuteSQLName(deleteSql, para);
-                if (rowsAffected[0].Count() != 0)
+                var rowsAffected = ds.ExecuteInsertAndGetLastId(deleteSql, para);
+                if (rowsAffected != 0)
                 {
                     resData.rData["rCode"] = 0;
                     resData.rData["rMessage"] = "Song deleted successfully.";
@@ -102,12 +107,12 @@ namespace COMMON_PROJECT_STRUCTURE_API.services
         public async Task<responseData> UpdateSong(requestData rData)
         {
             responseData resData = new responseData();
+            resData.eventID = rData.eventID;
+            resData.rData["rCode"] = 0;
+            resData.rData["rMessage"] = "Song found successfully!";
             try
             {
-                var query = @"UPDATE pc_student.Alltraxs_Songs
-                              SET title = @title, artist = @artist, album = @album, genre = @genre, duration = @duration, songUrl = @songUrl, songPic = @songPic
-                              WHERE SongId = @SongId";
-                MySqlParameter[] myParam = new MySqlParameter[]
+                MySqlParameter[] myParams = new MySqlParameter[]
                 {
                     new MySqlParameter("@SongId", rData.addInfo["SongId"]),
                     new MySqlParameter("@title", rData.addInfo["title"]),
@@ -118,20 +123,27 @@ namespace COMMON_PROJECT_STRUCTURE_API.services
                     new MySqlParameter("@songUrl", rData.addInfo["songUrl"]),
                     new MySqlParameter("@songPic", rData.addInfo["songPic"]),
                 };
+                var query = @"UPDATE pc_student.Alltraxs_Songs
+                              SET title = @title, artist = @artist, album = @album, genre = @genre, duration = @duration, songUrl = @songUrl, songPic = @songPic
+                              WHERE SongId = @SongId";
 
-                int rowsAffected = ds.ExecuteInsertAndGetLastId(query, myParam);
-                if (rowsAffected > 0)
+                var data = ds.ExecuteInsertAndGetLastId(query, myParams);
+                if (data == null)
                 {
-                    resData.rData["rMessage"] = "Song updated successfully.";
+                    resData.rData["rCode"] = 2;
+                    resData.rData["rMessage"] = "No Song found with the provided ID.";
                 }
                 else
                 {
-                    resData.rData["rMessage"] = "No Song found with the provided ID.";
+                    resData.rData["rCode"] = 0;
+                    resData.rData["rMessage"] = "Song updated successfully.";
                 }
             }
             catch (Exception ex)
             {
-                resData.rData["rMessage"] = "Exception occurred: " + ex.Message;
+                resData.rStatus = 404;
+                resData.rData["rCode"] = 1;
+                resData.rData["rMessage"] = $"Error: {ex.Message}";
             }
             return resData;
         }
@@ -160,6 +172,7 @@ namespace COMMON_PROJECT_STRUCTURE_API.services
                 }
                 else
                 {
+                    resData.rData["SongId"] = data[0][0]["SongId"];
                     resData.rData["Title"] = data[0][0]["Title"];
                     resData.rData["Artist"] = data[0][0]["Artist"];
                     resData.rData["Album"] = data[0][0]["Album"];
@@ -171,6 +184,7 @@ namespace COMMON_PROJECT_STRUCTURE_API.services
             }
             catch (Exception ex)
             {
+                resData.rStatus = 404;
                 resData.rData["rCode"] = 1;
                 resData.rData["rMessage"] = $"Error: {ex.Message}";
             }
