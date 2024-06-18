@@ -66,7 +66,7 @@ namespace COMMON_PROJECT_STRUCTURE_API.services
                 else
                 {
                     resData.rData["rCode"] = 0;
-                    resData.rData["rMessage"] = "Welcome, Login Successfully!";
+                    resData.rData["rMessage"] = "Login Successfully, Welcome!";
                 }
             }
             catch (Exception ex)

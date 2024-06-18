@@ -8,8 +8,8 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.Extensions.DependencyInjection;
-using COMMON_PROJECT_STRUCTURE_API.services;
 using Newtonsoft.Json.Linq;
+using COMMON_PROJECT_STRUCTURE_API.services;
 
 WebHost.CreateDefaultBuilder(args)
     .ConfigureServices(services =>
@@ -22,6 +22,7 @@ WebHost.CreateDefaultBuilder(args)
         services.AddSingleton<resetPassword>();
         services.AddSingleton<deleteProfile>();
         services.AddSingleton<contactUs>();
+        services.AddSingleton<songs>();
         services.AddSingleton<playlists>();
 
         services.AddAuthorization();
@@ -55,6 +56,7 @@ WebHost.CreateDefaultBuilder(args)
             var resetPassword = endpoints.ServiceProvider.GetService<resetPassword>();
             var deleteProfile = endpoints.ServiceProvider.GetRequiredService<deleteProfile>();
             var contactUs = endpoints.ServiceProvider.GetRequiredService<contactUs>();
+            var songs = endpoints.ServiceProvider.GetRequiredService<songs>();
             var playlists = endpoints.ServiceProvider.GetRequiredService<playlists>();
 
             endpoints.MapPost("/login",
@@ -118,32 +120,67 @@ WebHost.CreateDefaultBuilder(args)
                 requestData rData = JsonSerializer.Deserialize<requestData>(body);
                 if (rData.eventID == "1007") // Contact us
                     await http.Response.WriteAsJsonAsync(await contactUs.ContactUs(rData));
+            });
+
+            //Endponits for songs
+            endpoints.MapPost("/songs", async context =>
+            {
+                var body = await new StreamReader(context.Request.Body).ReadToEndAsync();
+                var rData = JsonSerializer.Deserialize<requestData>(body);
+
+                if (rData.eventID == "addSong")
+                {
+                    var result = await songs.PostSong(rData);
+                    await context.Response.WriteAsJsonAsync(result);
+                }
+                else
+                {
+                    context.Response.StatusCode = 400; // Bad Request
+                    await context.Response.WriteAsync("Invalid eventID for adding a song.");
+                }
+            }).RequireAuthorization();
+            endpoints.MapGet("/songs/{id}", async context =>
+            {
+                string songId = context.Request.RouteValues["id"] as string;
+                var rData = new requestData { addInfo = new Dictionary<string, object> { { "id", songId } } };
+
+                var result = await songs.GetSong(rData);
+                await context.Response.WriteAsJsonAsync(result);
+            }).RequireAuthorization();
+            endpoints.MapPut("/songs/{id}", async context =>
+            {
+                string songId = context.Request.RouteValues["id"] as string;
+                var body = await new StreamReader(context.Request.Body).ReadToEndAsync();
+                var rData = JsonSerializer.Deserialize<requestData>(body);
+                rData.addInfo["id"] = songId;
+
+                var result = await songs.UpdateSong(rData);
+                await context.Response.WriteAsJsonAsync(result);
+            }).RequireAuthorization();
+            endpoints.MapDelete("/songs/{id}", async context =>
+            {
+                string songId = context.Request.RouteValues["id"] as string;
+                var rData = new requestData { addInfo = new Dictionary<string, object> { { "id", songId } } };
+
+                var result = await songs.DeleteSong(rData);
+                await context.Response.WriteAsJsonAsync(result);
             }).RequireAuthorization();
 
+            //Endponits for playlists
             endpoints.MapPost("/playlists", async context =>
             {
                 var body = await new StreamReader(context.Request.Body).ReadToEndAsync();
                 var rData = JsonSerializer.Deserialize<requestData>(body);
 
-                if (rData.eventID == "1008")
+                if (rData.eventID == "addPlaylist")
                 {
-                    var result = await playlists.GetPlaylist(rData);
+                    var result = await playlists.CreatePlaylist(rData);
                     await context.Response.WriteAsJsonAsync(result);
                 }
-                else if (rData.eventID == "addPlaylist")
+                else
                 {
-                    var result = await playlists.AddPlaylist(rData);
-                    await context.Response.WriteAsJsonAsync(result);
-                }
-                else if (rData.eventID == "updatePlaylist")
-                {
-                    var result = await playlists.UpdatePlaylist(rData);
-                    await context.Response.WriteAsJsonAsync(result);
-                }
-                else if (rData.eventID == "deletePlaylist")
-                {
-                    var result = await playlists.DeletePlaylist(rData);
-                    await context.Response.WriteAsJsonAsync(result);
+                    context.Response.StatusCode = 400; // Bad Request
+                    await context.Response.WriteAsync("Invalid eventID for adding a playlist.");
                 }
             }).RequireAuthorization();
             endpoints.MapGet("/playlists/{id}", async context =>

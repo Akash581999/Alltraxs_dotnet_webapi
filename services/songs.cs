@@ -9,28 +9,27 @@ using MySql.Data.MySqlClient;
 
 namespace COMMON_PROJECT_STRUCTURE_API.services
 {
-    public class playlists
+    public class songs
     {
         dbServices ds = new dbServices();
-        public async Task<responseData> CreatePlaylist(requestData rData)
+        public async Task<responseData> PostSong(requestData rData)
         {
             responseData resData = new responseData();
             try
             {
-                var query = @"SELECT * FROM pc_student.Alltraxs_Playlists WHERE name=@name";
+                var query = @"SELECT * FROM pc_student.Alltraxs_Songs WHERE name=@name";
                 MySqlParameter[] myParam = new MySqlParameter[]
                 {
                     new MySqlParameter("@name", rData.addInfo["name"])
                 };
                 var dbData = ds.executeSQL(query, myParam);
-
                 if (dbData != null && dbData.Count > 0)
                 {
                     resData.rData["rMessage"] = "Playlist with this name already exists.";
                 }
                 else
                 {
-                    var insertQuery = @"INSERT INTO pc_student.Alltraxs_Playlists(image, name, price) 
+                    var insertQuery = @"INSERT INTO pc_student.Alltraxs_Songs(image, name, price) 
                                        VALUES (@image, @name, @price)";
                     MySqlParameter[] insertParams = new MySqlParameter[]
                     {
@@ -57,25 +56,25 @@ namespace COMMON_PROJECT_STRUCTURE_API.services
             return resData;
         }
 
-        public async Task<responseData> DeletePlaylist(requestData rData)
+        public async Task<responseData> DeleteSong(requestData rData)
         {
             responseData resData = new responseData();
             try
             {
-                var query = @"DELETE FROM pc_student.Alltraxs_Playlists WHERE id = @Id";
+                var query = @"DELETE FROM pc_student.Alltraxs_Songs WHERE id = @Id";
                 MySqlParameter[] myParam = new MySqlParameter[]
-                {
+               {
                     new MySqlParameter("@Id", rData.addInfo["id"])
-                };
+               };
 
-                int rowsAffected = ds.ExecuteInsertAndGetLastId(query, myParam);
-                if (rowsAffected > 0)
+                var song = ds.ExecuteInsertAndGetLastId(query, myParam);
+                if (song > 0)
                 {
-                    resData.rData["rMessage"] = "Playlist deleted successfully.";
+                    resData.rData["rMessage"] = "Song deleted successfully.";
                 }
                 else
                 {
-                    resData.rData["rMessage"] = "No playlist found with the provided ID.";
+                    resData.rData["rMessage"] = "No Song found with the provided ID.";
                 }
             }
             catch (Exception ex)
@@ -85,12 +84,12 @@ namespace COMMON_PROJECT_STRUCTURE_API.services
             return resData;
         }
 
-        public async Task<responseData> UpdatePlaylist(requestData rData)
+        public async Task<responseData> UpdateSong(requestData rData)
         {
             responseData resData = new responseData();
             try
             {
-                var query = @"UPDATE pc_student.Alltraxs_Playlists
+                var query = @"UPDATE pc_student.Alltraxs_Songs
                               SET image = @image, name = @name, price = @price
                               WHERE id = @id";
                 MySqlParameter[] myParam = new MySqlParameter[]
@@ -101,14 +100,14 @@ namespace COMMON_PROJECT_STRUCTURE_API.services
                     new MySqlParameter("@price", rData.addInfo["price"]),
                 };
 
-                int rowsAffected = ds.ExecuteInsertAndGetLastId(query, myParam);
-                if (rowsAffected > 0)
+                int song = ds.ExecuteInsertAndGetLastId(query, myParam);
+                if (song != 0)
                 {
-                    resData.rData["rMessage"] = "Playlist updated successfully.";
+                    resData.rData["rMessage"] = "No Song found with the provided ID.";
                 }
                 else
                 {
-                    resData.rData["rMessage"] = "No playlist found with the provided ID.";
+                    resData.rData["rMessage"] = "Song updated successfully.";
                 }
             }
             catch (Exception ex)
@@ -118,11 +117,10 @@ namespace COMMON_PROJECT_STRUCTURE_API.services
             return resData;
         }
 
-        public async Task<responseData> GetPlaylist(requestData req)
+        public async Task<responseData> GetSong(requestData req)
         {
             responseData resData = new responseData();
             resData.rData["rCode"] = 0;
-
             try
             {
                 var list = new ArrayList();
@@ -130,19 +128,19 @@ namespace COMMON_PROJECT_STRUCTURE_API.services
                 new MySqlParameter("@Id", req.addInfo["Id"]),
                 };
 
-                var sq = $"SELECT * FROM pc_student.Alltraxs_Playlists WHERE id=@id;";
-                var data = ds.ExecuteSQLName(sq, myParams);
-                if (data == null || data[0].Count() == 0)
+                var sq = $"SELECT * FROM pc_student.Alltraxs_Songs WHERE id=@id;";
+                var song = ds.ExecuteSQLName(sq, myParams);
+                if (song == null)
                 {
                     resData.rData["rCode"] = 1;
                     resData.rData["rMessage"] = "No Card is present...";
                 }
                 else
                 {
-                    resData.rData["id"] = data[0][0]["id"];
-                    resData.rData["image"] = data[0][0]["image"];
-                    resData.rData["name"] = data[0][0]["name"];
-                    resData.rData["price"] = data[0][0]["price"];
+                    resData.rData["id"] = song[0][0]["id"];
+                    resData.rData["image"] = song[0][0]["image"];
+                    resData.rData["name"] = song[0][0]["name"];
+                    resData.rData["price"] = song[0][0]["price"];
                 }
             }
             catch (Exception ex)
