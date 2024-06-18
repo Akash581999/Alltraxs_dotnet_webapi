@@ -12,74 +12,89 @@ namespace COMMON_PROJECT_STRUCTURE_API.services
     public class songs
     {
         dbServices ds = new dbServices();
+
         public async Task<responseData> PostSong(requestData rData)
         {
             responseData resData = new responseData();
             try
             {
-                var query = @"SELECT * FROM pc_student.Alltraxs_Songs WHERE name=@name";
+                var query = @"SELECT * FROM pc_student.Alltraxs_Songs WHERE title=@title";
                 MySqlParameter[] myParam = new MySqlParameter[]
                 {
-                    new MySqlParameter("@name", rData.addInfo["name"])
+                    new MySqlParameter("@title", rData.addInfo["title"])
                 };
-                var dbData = ds.executeSQL(query, myParam);
-                if (dbData != null && dbData.Count > 0)
+
+                var dbData = ds.ExecuteSQLName(query, myParam);
+                if (dbData[0].Count() != 0)
                 {
-                    resData.rData["rMessage"] = "Playlist with this name already exists.";
+                    resData.rData["rCode"] = 2;
+                    resData.rData["rMessage"] = "Song with this name already exists.";
                 }
                 else
                 {
-                    var insertQuery = @"INSERT INTO pc_student.Alltraxs_Songs(image, name, price) 
-                                       VALUES (@image, @name, @price)";
+                    var insertQuery = @"INSERT INTO pc_student.Alltraxs_Songs(title, artist, album, genre, duration, songUrl, songPic) 
+                                       VALUES (@title, @artist, @album, @genre, @duration, @songUrl, @songPic)";
                     MySqlParameter[] insertParams = new MySqlParameter[]
                     {
-                        new MySqlParameter("@image", rData.addInfo["image"]),
-                        new MySqlParameter("@name", rData.addInfo["name"]),
-                        new MySqlParameter("@price", rData.addInfo["price"]),
+                        new MySqlParameter("@title", rData.addInfo["title"]),
+                        new MySqlParameter("@artist", rData.addInfo["artist"]),
+                        new MySqlParameter("@album", rData.addInfo["album"]),
+                        new MySqlParameter("@genre", rData.addInfo["genre"]),
+                        new MySqlParameter("@duration", rData.addInfo["duration"]),
+                        new MySqlParameter("@songUrl", rData.addInfo["songUrl"]),
+                        new MySqlParameter("@songPic", rData.addInfo["songPic"]),
                     };
 
                     int rowsAffected = ds.ExecuteInsertAndGetLastId(insertQuery, insertParams);
                     if (rowsAffected > 0)
                     {
-                        resData.rData["rMessage"] = "Playlist added successfully.";
+                        resData.eventID = rData.eventID;
+                        resData.rData["rCode"] = 0;
+                        resData.rData["rMessage"] = "Song uploaded successfully.";
                     }
                     else
                     {
-                        resData.rData["rMessage"] = "Failed to add playlist.";
+                        resData.rData["rCode"] = 3;
+                        resData.rData["rMessage"] = "Failed to upload song.";
                     }
                 }
             }
             catch (Exception ex)
             {
+                resData.rData["rCode"] = 1;
                 resData.rData["rMessage"] = "An error occurred: " + ex.Message;
             }
             return resData;
         }
 
-        public async Task<responseData> DeleteSong(requestData rData)
+        public async Task<responseData> DeleteSong(requestData req)
         {
             responseData resData = new responseData();
             try
             {
-                var query = @"DELETE FROM pc_student.Alltraxs_Songs WHERE id = @Id";
-                MySqlParameter[] myParam = new MySqlParameter[]
-               {
-                    new MySqlParameter("@Id", rData.addInfo["id"])
-               };
-
-                var song = ds.ExecuteInsertAndGetLastId(query, myParam);
-                if (song > 0)
+                MySqlParameter[] para = new MySqlParameter[]
                 {
+                    new MySqlParameter("@SongId", req.addInfo["SongId"].ToString()),
+                };
+
+                var deleteSql = $"DELETE FROM pc_student.Alltraxs_Songs WHERE SongId = @SongId";
+                var rowsAffected = ds.ExecuteSQLName(deleteSql, para);
+                if (rowsAffected[0].Count() != 0)
+                {
+                    resData.rData["rCode"] = 0;
                     resData.rData["rMessage"] = "Song deleted successfully.";
                 }
                 else
                 {
-                    resData.rData["rMessage"] = "No Song found with the provided ID.";
+                    resData.rData["rCode"] = 2;
+                    resData.rData["rMessage"] = "No song found with the provided ID.";
                 }
             }
             catch (Exception ex)
             {
-                resData.rData["rMessage"] = "Exception occurred: " + ex.Message;
+                resData.rStatus = 404;
+                resData.rData["rCode"] = 1;
+                resData.rData["rMessage"] = $"Error: {ex.Message}";
             }
             return resData;
         }
@@ -90,24 +105,28 @@ namespace COMMON_PROJECT_STRUCTURE_API.services
             try
             {
                 var query = @"UPDATE pc_student.Alltraxs_Songs
-                              SET image = @image, name = @name, price = @price
-                              WHERE id = @id";
+                              SET title = @title, artist = @artist, album = @album, genre = @genre, duration = @duration, songUrl = @songUrl, songPic = @songPic
+                              WHERE SongId = @SongId";
                 MySqlParameter[] myParam = new MySqlParameter[]
                 {
-                    new MySqlParameter("@id", rData.addInfo["id"]),
-                    new MySqlParameter("@image", rData.addInfo["image"]),
-                    new MySqlParameter("@name", rData.addInfo["name"]),
-                    new MySqlParameter("@price", rData.addInfo["price"]),
+                    new MySqlParameter("@SongId", rData.addInfo["SongId"]),
+                    new MySqlParameter("@title", rData.addInfo["title"]),
+                    new MySqlParameter("@artist", rData.addInfo["artist"]),
+                    new MySqlParameter("@album", rData.addInfo["album"]),
+                    new MySqlParameter("@genre", rData.addInfo["genre"]),
+                    new MySqlParameter("@duration", rData.addInfo["duration"]),
+                    new MySqlParameter("@songUrl", rData.addInfo["songUrl"]),
+                    new MySqlParameter("@songPic", rData.addInfo["songPic"]),
                 };
 
-                int song = ds.ExecuteInsertAndGetLastId(query, myParam);
-                if (song != 0)
+                int rowsAffected = ds.ExecuteInsertAndGetLastId(query, myParam);
+                if (rowsAffected > 0)
                 {
-                    resData.rData["rMessage"] = "No Song found with the provided ID.";
+                    resData.rData["rMessage"] = "Song updated successfully.";
                 }
                 else
                 {
-                    resData.rData["rMessage"] = "Song updated successfully.";
+                    resData.rData["rMessage"] = "No Song found with the provided ID.";
                 }
             }
             catch (Exception ex)
@@ -120,33 +139,40 @@ namespace COMMON_PROJECT_STRUCTURE_API.services
         public async Task<responseData> GetSong(requestData req)
         {
             responseData resData = new responseData();
+            resData.eventID = req.eventID;
             resData.rData["rCode"] = 0;
+            resData.rData["rMessage"] = "Song found successfully!";
+
             try
             {
-                var list = new ArrayList();
-                MySqlParameter[] myParams = new MySqlParameter[] {
-                new MySqlParameter("@Id", req.addInfo["Id"]),
+                string input = req.addInfo["SongId"].ToString();
+                MySqlParameter[] myParams = new MySqlParameter[]
+                {
+                    new MySqlParameter("@SongId", input)
                 };
 
-                var sq = $"SELECT * FROM pc_student.Alltraxs_Songs WHERE id=@id;";
-                var song = ds.ExecuteSQLName(sq, myParams);
-                if (song == null)
+                var sql = $"SELECT * FROM pc_student.Alltraxs_Songs WHERE SongId=@SongId;";
+                var data = ds.ExecuteSQLName(sql, myParams);
+                if (data == null || data[0].Count() == 0)
                 {
-                    resData.rData["rCode"] = 1;
-                    resData.rData["rMessage"] = "No Card is present...";
+                    resData.rData["rCode"] = 2;
+                    resData.rData["rMessage"] = "Song not found!";
                 }
                 else
                 {
-                    resData.rData["id"] = song[0][0]["id"];
-                    resData.rData["image"] = song[0][0]["image"];
-                    resData.rData["name"] = song[0][0]["name"];
-                    resData.rData["price"] = song[0][0]["price"];
+                    resData.rData["Title"] = data[0][0]["Title"];
+                    resData.rData["Artist"] = data[0][0]["Artist"];
+                    resData.rData["Album"] = data[0][0]["Album"];
+                    resData.rData["Genre"] = data[0][0]["Genre"];
+                    resData.rData["Duration"] = data[0][0]["Duration"];
+                    resData.rData["SongUrl"] = data[0][0]["SongUrl"];
+                    resData.rData["SongPic"] = data[0][0]["SongPic"];
                 }
             }
             catch (Exception ex)
             {
                 resData.rData["rCode"] = 1;
-                resData.rData["rMessage"] = "Exception occurred: " + ex.Message;
+                resData.rData["rMessage"] = $"Error: {ex.Message}";
             }
             return resData;
         }

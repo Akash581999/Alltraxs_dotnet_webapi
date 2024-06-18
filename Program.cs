@@ -123,48 +123,39 @@ WebHost.CreateDefaultBuilder(args)
             });
 
             //Endponits for songs
-            endpoints.MapPost("/songs", async context =>
+            endpoints.MapPost("/songs",
+            [AllowAnonymous] async (HttpContext http) =>
             {
-                var body = await new StreamReader(context.Request.Body).ReadToEndAsync();
-                var rData = JsonSerializer.Deserialize<requestData>(body);
-
-                if (rData.eventID == "addSong")
-                {
-                    var result = await songs.PostSong(rData);
-                    await context.Response.WriteAsJsonAsync(result);
-                }
-                else
-                {
-                    context.Response.StatusCode = 400; // Bad Request
-                    await context.Response.WriteAsync("Invalid eventID for adding a song.");
-                }
-            }).RequireAuthorization();
-            endpoints.MapGet("/songs/{id}", async context =>
+                var body = await new StreamReader(http.Request.Body).ReadToEndAsync();
+                requestData rData = JsonSerializer.Deserialize<requestData>(body);
+                if (rData.eventID == "1008") // Post song
+                    await http.Response.WriteAsJsonAsync(await songs.PostSong(rData));
+            });
+            endpoints.MapDelete("/songs/id",
+            [AllowAnonymous] async (HttpContext http) =>
             {
-                string songId = context.Request.RouteValues["id"] as string;
-                var rData = new requestData { addInfo = new Dictionary<string, object> { { "id", songId } } };
-
-                var result = await songs.GetSong(rData);
-                await context.Response.WriteAsJsonAsync(result);
-            }).RequireAuthorization();
-            endpoints.MapPut("/songs/{id}", async context =>
+                var body = await new StreamReader(http.Request.Body).ReadToEndAsync();
+                requestData rData = JsonSerializer.Deserialize<requestData>(body);
+                if (rData.eventID == "1009") // Delete song
+                    await http.Response.WriteAsJsonAsync(await songs.DeleteSong(rData));
+            });
+            endpoints.MapPut("/songs/id",
+            [AllowAnonymous] async (HttpContext http) =>
             {
-                string songId = context.Request.RouteValues["id"] as string;
-                var body = await new StreamReader(context.Request.Body).ReadToEndAsync();
-                var rData = JsonSerializer.Deserialize<requestData>(body);
-                rData.addInfo["id"] = songId;
-
-                var result = await songs.UpdateSong(rData);
-                await context.Response.WriteAsJsonAsync(result);
-            }).RequireAuthorization();
-            endpoints.MapDelete("/songs/{id}", async context =>
+                var body = await new StreamReader(http.Request.Body).ReadToEndAsync();
+                requestData rData = JsonSerializer.Deserialize<requestData>(body);
+                if (rData.eventID == "1010") // Update song
+                    await http.Response.WriteAsJsonAsync(await songs.UpdateSong(rData));
+            });
+            endpoints.MapPost("/songs/id",
+            [AllowAnonymous] async (HttpContext http) =>
             {
-                string songId = context.Request.RouteValues["id"] as string;
-                var rData = new requestData { addInfo = new Dictionary<string, object> { { "id", songId } } };
+                var body = await new StreamReader(http.Request.Body).ReadToEndAsync();
+                requestData rData = JsonSerializer.Deserialize<requestData>(body);
+                if (rData.eventID == "1011") // Get song
+                    await http.Response.WriteAsJsonAsync(await songs.GetSong(rData));
+            });
 
-                var result = await songs.DeleteSong(rData);
-                await context.Response.WriteAsJsonAsync(result);
-            }).RequireAuthorization();
 
             //Endponits for playlists
             endpoints.MapPost("/playlists", async context =>

@@ -71,8 +71,8 @@ namespace COMMON_PROJECT_STRUCTURE_API.services
             }
             catch (Exception ex)
             {
-                resData.rData["rCode"] = 1;
                 resData.rStatus = 404;
+                resData.rData["rCode"] = 1;
                 resData.rData["rMessage"] = ex.Message;
             }
             return resData;

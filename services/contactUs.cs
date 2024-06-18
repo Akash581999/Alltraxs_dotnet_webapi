@@ -41,7 +41,6 @@ namespace COMMON_PROJECT_STRUCTURE_API.services
 
                     if (insertId != 0)
                     {
-                        // resData.eventID = req.eventID;
                         resData.rData["rCode"] = 0;
                         resData.rData["rMessage"] = "Thank you for your response";
                     }
