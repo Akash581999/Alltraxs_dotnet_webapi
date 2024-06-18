@@ -163,7 +163,7 @@ WebHost.CreateDefaultBuilder(args)
                 var body = await new StreamReader(context.Request.Body).ReadToEndAsync();
                 var rData = JsonSerializer.Deserialize<requestData>(body);
 
-                if (rData.eventID == "addPlaylist")
+                if (rData.eventID == "1012")
                 {
                     var result = await playlists.CreatePlaylist(rData);
                     await context.Response.WriteAsJsonAsync(result);
@@ -173,7 +173,7 @@ WebHost.CreateDefaultBuilder(args)
                     context.Response.StatusCode = 400; // Bad Request
                     await context.Response.WriteAsync("Invalid eventID for adding a playlist.");
                 }
-            }).RequireAuthorization();
+            });
             endpoints.MapGet("/playlists/{id}", async context =>
             {
                 string playlistId = context.Request.RouteValues["id"] as string;
@@ -181,7 +181,7 @@ WebHost.CreateDefaultBuilder(args)
 
                 var result = await playlists.GetPlaylist(rData);
                 await context.Response.WriteAsJsonAsync(result);
-            }).RequireAuthorization();
+            });
             endpoints.MapPut("/playlists/{id}", async context =>
             {
                 string playlistId = context.Request.RouteValues["id"] as string;
@@ -191,7 +191,7 @@ WebHost.CreateDefaultBuilder(args)
 
                 var result = await playlists.UpdatePlaylist(rData);
                 await context.Response.WriteAsJsonAsync(result);
-            }).RequireAuthorization();
+            });
             endpoints.MapDelete("/playlists/{id}", async context =>
             {
                 string playlistId = context.Request.RouteValues["id"] as string;
@@ -199,7 +199,7 @@ WebHost.CreateDefaultBuilder(args)
 
                 var result = await playlists.DeletePlaylist(rData);
                 await context.Response.WriteAsJsonAsync(result);
-            }).RequireAuthorization();
+            });
 
             endpoints.MapGet("/bing",
                  async c => await c.Response.WriteAsJsonAsync("{'Name':'Akash','Age':'24','Project':'AllTraxs_Music_Webapp'}"));

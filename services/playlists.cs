@@ -15,44 +15,54 @@ namespace COMMON_PROJECT_STRUCTURE_API.services
         public async Task<responseData> CreatePlaylist(requestData rData)
         {
             responseData resData = new responseData();
+            resData.eventID = rData.eventID;
+            resData.rData["rCode"] = 0;
             try
             {
-                var query = @"SELECT * FROM pc_student.Alltraxs_Playlists WHERE name=@name";
+                var query = @"SELECT * FROM pc_student.Alltraxs_Playlists WHERE Title=@Title";
                 MySqlParameter[] myParam = new MySqlParameter[]
                 {
-                    new MySqlParameter("@name", rData.addInfo["name"])
+                    new MySqlParameter("@Title", rData.addInfo["Title"])
                 };
-                var dbData = ds.executeSQL(query, myParam);
 
-                if (dbData != null && dbData.Count > 0)
+                var dbData = ds.ExecuteSQLName(query, myParam);
+                if (dbData[0].Count() != 0)
                 {
+                    resData.rData["rCode"] = 2;
                     resData.rData["rMessage"] = "Playlist with this name already exists.";
                 }
                 else
                 {
-                    var insertQuery = @"INSERT INTO pc_student.Alltraxs_Playlists(image, name, price) 
-                                       VALUES (@image, @name, @price)";
+                    var insertQuery = @"INSERT INTO pc_student.Alltraxs_Playlists(UserId, Title, Description, PlaylistImageUrl, IsPublic) 
+                                       VALUES (@UserId, @Title, @Description, @PlaylistImageUrl, @IsPublic)";
                     MySqlParameter[] insertParams = new MySqlParameter[]
                     {
-                        new MySqlParameter("@image", rData.addInfo["image"]),
-                        new MySqlParameter("@name", rData.addInfo["name"]),
-                        new MySqlParameter("@price", rData.addInfo["price"]),
+                        new MySqlParameter("@UserId", rData.addInfo["UserId"]),
+                        new MySqlParameter("@Title", rData.addInfo["Title"]),
+                        new MySqlParameter("@Description", rData.addInfo["Description"]),
+                        new MySqlParameter("@PlaylistImageUrl", rData.addInfo["PlaylistImageUrl"]),
+                        new MySqlParameter("@IsPublic", rData.addInfo["IsPublic"]),
                     };
 
                     int rowsAffected = ds.ExecuteInsertAndGetLastId(insertQuery, insertParams);
                     if (rowsAffected > 0)
                     {
+                        resData.eventID = rData.eventID;
+                        resData.rData["rCode"] = 0;
                         resData.rData["rMessage"] = "Playlist added successfully.";
                     }
                     else
                     {
+                        resData.rData["rCode"] = 3;
                         resData.rData["rMessage"] = "Failed to add playlist.";
                     }
                 }
             }
             catch (Exception ex)
             {
-                resData.rData["rMessage"] = "An error occurred: " + ex.Message;
+                resData.rStatus = 404;
+                resData.rData["rCode"] = 1;
+                resData.rData["rMessage"] = $"Error: {ex.Message}";
             }
             return resData;
         }
@@ -60,13 +70,15 @@ namespace COMMON_PROJECT_STRUCTURE_API.services
         public async Task<responseData> DeletePlaylist(requestData rData)
         {
             responseData resData = new responseData();
+            resData.eventID = rData.eventID;
+            resData.rData["rCode"] = 0;
             try
             {
-                var query = @"DELETE FROM pc_student.Alltraxs_Playlists WHERE id = @Id";
                 MySqlParameter[] myParam = new MySqlParameter[]
                 {
-                    new MySqlParameter("@Id", rData.addInfo["id"])
+                    new MySqlParameter("@Playlist_Id", rData.addInfo["Playlist_Id"])
                 };
+                var query = @"DELETE FROM pc_student.Alltraxs_Playlists WHERE Playlist_Id = @Playlist_Id";
 
                 int rowsAffected = ds.ExecuteInsertAndGetLastId(query, myParam);
                 if (rowsAffected > 0)
@@ -91,14 +103,14 @@ namespace COMMON_PROJECT_STRUCTURE_API.services
             try
             {
                 var query = @"UPDATE pc_student.Alltraxs_Playlists
-                              SET image = @image, name = @name, price = @price
-                              WHERE id = @id";
+                              SET Title = @Title, Description = @Description, PlaylistImageUrl = @PlaylistImageUrl, IsPublic = @IsPublic
+                              WHERE Playlist_Id = @Playlist_Id";
                 MySqlParameter[] myParam = new MySqlParameter[]
                 {
-                    new MySqlParameter("@id", rData.addInfo["id"]),
-                    new MySqlParameter("@image", rData.addInfo["image"]),
-                    new MySqlParameter("@name", rData.addInfo["name"]),
-                    new MySqlParameter("@price", rData.addInfo["price"]),
+                    new MySqlParameter("@Title", rData.addInfo["Title"]),
+                    new MySqlParameter("@Description", rData.addInfo["Description"]),
+                    new MySqlParameter("@PlaylistImageUrl", rData.addInfo["PlaylistImageUrl"]),
+                    new MySqlParameter("@IsPublic", rData.addInfo["IsPublic"]),
                 };
 
                 int rowsAffected = ds.ExecuteInsertAndGetLastId(query, myParam);
@@ -127,10 +139,10 @@ namespace COMMON_PROJECT_STRUCTURE_API.services
             {
                 var list = new ArrayList();
                 MySqlParameter[] myParams = new MySqlParameter[] {
-                new MySqlParameter("@Id", req.addInfo["Id"]),
+                new MySqlParameter("@Playlist_Id", req.addInfo["Playlist_Id"]),
                 };
 
-                var sq = $"SELECT * FROM pc_student.Alltraxs_Playlists WHERE id=@id;";
+                var sq = $"SELECT * FROM pc_student.Alltraxs_Playlists WHERE Playlist_Id=@Playlist_Id;";
                 var data = ds.ExecuteSQLName(sq, myParams);
                 if (data == null || data[0].Count() == 0)
                 {
@@ -139,10 +151,14 @@ namespace COMMON_PROJECT_STRUCTURE_API.services
                 }
                 else
                 {
-                    resData.rData["id"] = data[0][0]["id"];
-                    resData.rData["image"] = data[0][0]["image"];
-                    resData.rData["name"] = data[0][0]["name"];
-                    resData.rData["price"] = data[0][0]["price"];
+                    resData.rData["Playlist_Id"] = data[0][0]["Playlist_Id"];
+                    resData.rData["UserId"] = data[0][0]["UserId"];
+                    resData.rData["Title"] = data[0][0]["Title"];
+                    resData.rData["Description"] = data[0][0]["Description"];
+                    resData.rData["CreatedOn"] = data[0][0]["CreatedOn"];
+                    resData.rData["PlaylistImageUrl"] = data[0][0]["PlaylistImageUrl"];
+                    resData.rData["IsPublic"] = data[0][0]["IsPublic"];
+                    resData.rData["NumSongs"] = data[0][0]["NumSongs"];
                 }
             }
             catch (Exception ex)
