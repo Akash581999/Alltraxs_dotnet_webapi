@@ -13,40 +13,49 @@ namespace COMMON_PROJECT_STRUCTURE_API.services
         public async Task<responseData> ChangePassword(requestData req)
         {
             responseData resData = new responseData();
-
+            resData.eventID = req.eventID;
+            resData.rData["rCode"] = 0;
             try
             {
-                // Update user's password in the database
-                MySqlParameter[] para = new MySqlParameter[]
-                {
-                    new MySqlParameter("@UserId", req.addInfo["UserId"].ToString()),
-                    new MySqlParameter("@UserPassword", req.addInfo["UserPassword"].ToString()),
-                };
-                var updateSql = @"UPDATE pc_student.Alltraxs_users SET UserPassword = @UserPassword WHERE UserId = @UserId;";
-                var rowsAffected = ds.ExecuteInsertAndGetLastId(updateSql, para);
+                string UserId = req.addInfo["UserId"].ToString();
+                string UserPassword = req.addInfo["UserPassword"].ToString();
+                string NewPassword = req.addInfo["NewPassword"].ToString();
 
-                if (rowsAffected > 0)
+                if (UserPassword == NewPassword)
                 {
-                    resData.eventID = req.eventID;
-                    resData.rData["rCode"] = 0;
-                    resData.rData["rMessage"] = "Password changed successfully";
+                    resData.rData["rCode"] = 1;
+                    resData.rData["rMessage"] = "New password must be different from the current password";
                 }
                 else
                 {
-                    var selectSql = @"SELECT * FROM pc_student.Alltraxs_users WHERE UserId = @UserId";
-                    var existingDataList = ds.ExecuteSQLName(selectSql, para);
-
-                    if (existingDataList != null && existingDataList.Count > 0)
+                    MySqlParameter[] parameters = new MySqlParameter[]
                     {
-                        // User found, but failed to update password
+                        new MySqlParameter("@UserId", UserId),
+                        new MySqlParameter("@NewPassword", NewPassword),
+                        new MySqlParameter("@UserPassword", UserPassword)
+                    };
+
+                    var checkSql = $"SELECT * FROM pc_student.Alltraxs_users WHERE UserId=@UserId AND UserPassword=@UserPassword;";
+                    var checkResult = ds.executeSQL(checkSql, parameters);
+                    if (checkResult[0].Count() == 0)
+                    {
                         resData.rData["rCode"] = 2;
-                        resData.rData["rMessage"] = "Password not changed";
+                        resData.rData["rMessage"] = "Wrong credentials, enter valid details!";
                     }
                     else
                     {
-                        // No user found with the provided UserId
-                        resData.rData["rCode"] = 3;
-                        resData.rData["rMessage"] = "No user found with the provided UserId";
+                        string updateSql = $"UPDATE pc_student.Alltraxs_users SET UserPassword = @NewPassword WHERE UserId = @UserId";
+                        var rowsAffected = ds.executeSQL(updateSql, parameters);
+                        if (rowsAffected[0].Count() != 0)
+                        {
+                            resData.rData["rCode"] = 3;
+                            resData.rData["rMessage"] = "Password didnt changed!";
+                        }
+                        else
+                        {
+                            resData.rData["rCode"] = 0;
+                            resData.rData["rMessage"] = "Password changed successfully";
+                        }
                     }
                 }
             }

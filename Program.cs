@@ -19,7 +19,7 @@ WebHost.CreateDefaultBuilder(args)
         services.AddSingleton<register>();
         services.AddSingleton<editProfile>();
         services.AddSingleton<changePassword>();
-        services.AddSingleton<resetPassword>();
+        // services.AddSingleton<resetPassword>();
         services.AddSingleton<deleteProfile>();
         services.AddSingleton<contactUs>();
         services.AddSingleton<songs>();
@@ -27,7 +27,7 @@ WebHost.CreateDefaultBuilder(args)
 
         services.AddAuthorization();
         services.AddControllers();
-        services.AddCors();
+        services.AddCors(options => { options.AddPolicy("AllowAnyOrigin", builder => { builder.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod(); }); });
         services.AddAuthentication("SourceJWT").AddScheme<SourceJwtAuthenticationSchemeOptions, SourceJwtAuthenticationHandler>("SourceJWT", options =>
            {
                options.SecretKey = appsettings["jwt_config:Key"].ToString();
@@ -38,9 +38,10 @@ WebHost.CreateDefaultBuilder(args)
     })
     .Configure(app =>
     {
-        app.UseCors(options =>
-            options.WithOrigins("https://localhost:5002", "http://localhost:5001")
-            .AllowAnyHeader().AllowAnyMethod().AllowAnyOrigin());
+        // app.UseCors(options =>
+        //     options.WithOrigins("https://localhost:5002", "http://localhost:5001")
+        //     .AllowAnyHeader().AllowAnyMethod().AllowAnyOrigin());
+        app.UseCors("AllowAnyOrigin");
         app.UseRouting();
         app.UseStaticFiles();
 
@@ -53,7 +54,7 @@ WebHost.CreateDefaultBuilder(args)
             var register = endpoints.ServiceProvider.GetRequiredService<register>();
             var editProfile = endpoints.ServiceProvider.GetRequiredService<editProfile>();
             var changePassword = endpoints.ServiceProvider.GetRequiredService<changePassword>();
-            var resetPassword = endpoints.ServiceProvider.GetService<resetPassword>();
+            // var resetPassword = endpoints.ServiceProvider.GetService<resetPassword>();
             var deleteProfile = endpoints.ServiceProvider.GetRequiredService<deleteProfile>();
             var contactUs = endpoints.ServiceProvider.GetRequiredService<contactUs>();
             var songs = endpoints.ServiceProvider.GetRequiredService<songs>();
@@ -68,7 +69,7 @@ WebHost.CreateDefaultBuilder(args)
                     await http.Response.WriteAsJsonAsync(await login.Login(rData));
             }).RequireAuthorization();
 
-            endpoints.MapPost("register",
+            endpoints.MapPost("/register",
             [AllowAnonymous] async (HttpContext http) =>
             {
                 var body = await new StreamReader(http.Request.Body).ReadToEndAsync();
@@ -77,7 +78,7 @@ WebHost.CreateDefaultBuilder(args)
                     await http.Response.WriteAsJsonAsync(await register.Register(rData));
             }).RequireAuthorization();
 
-            endpoints.MapPut("editProfile",
+            endpoints.MapPut("/editProfile",
             [AllowAnonymous] async (HttpContext http) =>
             {
                 var body = await new StreamReader(http.Request.Body).ReadToEndAsync();
@@ -86,7 +87,7 @@ WebHost.CreateDefaultBuilder(args)
                     await http.Response.WriteAsJsonAsync(await editProfile.EditProfile(rData));
             });
 
-            endpoints.MapPut("changePassword",
+            endpoints.MapPut("/changePassword",
             [AllowAnonymous] async (HttpContext http) =>
             {
                 var body = await new StreamReader(http.Request.Body).ReadToEndAsync();
@@ -95,16 +96,16 @@ WebHost.CreateDefaultBuilder(args)
                     await http.Response.WriteAsJsonAsync(await changePassword.ChangePassword(rData));
             });
 
-            endpoints.MapPut("resetPassword",
-            [AllowAnonymous] async (HttpContext http) =>
-            {
-                var body = await new StreamReader(http.Request.Body).ReadToEndAsync();
-                requestData rData = JsonSerializer.Deserialize<requestData>(body);
-                if (rData.eventID == "1005") // Update
-                    await http.Response.WriteAsJsonAsync(await resetPassword.ResetPassword(rData));
-            });
+            // endpoints.MapPut("/resetPassword",
+            // [AllowAnonymous] async (HttpContext http) =>
+            // {
+            //     var body = await new StreamReader(http.Request.Body).ReadToEndAsync();
+            //     requestData rData = JsonSerializer.Deserialize<requestData>(body);
+            //     if (rData.eventID == "1005") // Update
+            //         await http.Response.WriteAsJsonAsync(await resetPassword.ResetPassword(rData));
+            // });
 
-            endpoints.MapDelete("deleteProfile",
+            endpoints.MapDelete("/deleteProfile",
             [AllowAnonymous] async (HttpContext http) =>
             {
                 var body = await new StreamReader(http.Request.Body).ReadToEndAsync();
@@ -113,7 +114,7 @@ WebHost.CreateDefaultBuilder(args)
                     await http.Response.WriteAsJsonAsync(await deleteProfile.DeleteProfile(rData));
             });
 
-            endpoints.MapPost("contactUs",
+            endpoints.MapPost("/contactUs",
             [AllowAnonymous] async (HttpContext http) =>
             {
                 var body = await new StreamReader(http.Request.Body).ReadToEndAsync();
@@ -147,7 +148,7 @@ WebHost.CreateDefaultBuilder(args)
                 if (rData.eventID == "1010") // Update song
                     await http.Response.WriteAsJsonAsync(await songs.UpdateSong(rData));
             });
-            endpoints.MapPost("/songs/id",
+            endpoints.MapGet("/songs/id",
             [AllowAnonymous] async (HttpContext http) =>
             {
                 var body = await new StreamReader(http.Request.Body).ReadToEndAsync();
@@ -158,47 +159,37 @@ WebHost.CreateDefaultBuilder(args)
 
 
             //Endponits for playlists
-            endpoints.MapPost("/playlists", async context =>
+            endpoints.MapPost("/playlists",
+            [AllowAnonymous] async (HttpContext http) =>
             {
-                var body = await new StreamReader(context.Request.Body).ReadToEndAsync();
-                var rData = JsonSerializer.Deserialize<requestData>(body);
-
-                if (rData.eventID == "1012")
-                {
-                    var result = await playlists.CreatePlaylist(rData);
-                    await context.Response.WriteAsJsonAsync(result);
-                }
-                else
-                {
-                    context.Response.StatusCode = 400; // Bad Request
-                    await context.Response.WriteAsync("Invalid eventID for adding a playlist.");
-                }
+                var body = await new StreamReader(http.Request.Body).ReadToEndAsync();
+                requestData rData = JsonSerializer.Deserialize<requestData>(body);
+                if (rData.eventID == "1012") // Create playlist
+                    await http.Response.WriteAsJsonAsync(await playlists.CreatePlaylist(rData));
             });
-            endpoints.MapGet("/playlists/{id}", async context =>
+            endpoints.MapDelete("/playlists/id",
+            [AllowAnonymous] async (HttpContext http) =>
             {
-                string playlistId = context.Request.RouteValues["id"] as string;
-                var rData = new requestData { addInfo = new Dictionary<string, object> { { "id", playlistId } } };
-
-                var result = await playlists.GetPlaylist(rData);
-                await context.Response.WriteAsJsonAsync(result);
+                var body = await new StreamReader(http.Request.Body).ReadToEndAsync();
+                requestData rData = JsonSerializer.Deserialize<requestData>(body);
+                if (rData.eventID == "1013") // Delete playlist
+                    await http.Response.WriteAsJsonAsync(await playlists.DeletePlaylist(rData));
             });
-            endpoints.MapPut("/playlists/{id}", async context =>
+            endpoints.MapPut("/playlists/id",
+            [AllowAnonymous] async (HttpContext http) =>
             {
-                string playlistId = context.Request.RouteValues["id"] as string;
-                var body = await new StreamReader(context.Request.Body).ReadToEndAsync();
-                var rData = JsonSerializer.Deserialize<requestData>(body);
-                rData.addInfo["id"] = playlistId;
-
-                var result = await playlists.UpdatePlaylist(rData);
-                await context.Response.WriteAsJsonAsync(result);
+                var body = await new StreamReader(http.Request.Body).ReadToEndAsync();
+                requestData rData = JsonSerializer.Deserialize<requestData>(body);
+                if (rData.eventID == "1014") // Update playlist
+                    await http.Response.WriteAsJsonAsync(await playlists.UpdatePlaylist(rData));
             });
-            endpoints.MapDelete("/playlists/{id}", async context =>
+            endpoints.MapGet("/playlists/id",
+            [AllowAnonymous] async (HttpContext http) =>
             {
-                string playlistId = context.Request.RouteValues["id"] as string;
-                var rData = new requestData { addInfo = new Dictionary<string, object> { { "id", playlistId } } };
-
-                var result = await playlists.DeletePlaylist(rData);
-                await context.Response.WriteAsJsonAsync(result);
+                var body = await new StreamReader(http.Request.Body).ReadToEndAsync();
+                requestData rData = JsonSerializer.Deserialize<requestData>(body);
+                if (rData.eventID == "1015") // Get playlist
+                    await http.Response.WriteAsJsonAsync(await playlists.GetPlaylist(rData));
             });
 
             endpoints.MapGet("/bing",
@@ -207,11 +198,9 @@ WebHost.CreateDefaultBuilder(args)
     }).Build().Run();
 
 var builder = WebApplication.CreateBuilder(args);
-
 var app = builder.Build();
 
 app.MapGet("/", () => "Hello World!");
-
 app.Run();
 
 public record requestData

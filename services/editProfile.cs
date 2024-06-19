@@ -1,7 +1,11 @@
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
 using System.Text;
+using System.Linq;
+using System.Security.Claims;
+using System.Threading.Tasks;
+using System.Collections.Generic;
 using System.Text.RegularExpressions;
+using System.IdentityModel.Tokens.Jwt;
+using Org.BouncyCastle.Ocsp;
 using Microsoft.IdentityModel.Tokens;
 using MySql.Data.MySqlClient;
 
@@ -13,30 +17,29 @@ namespace COMMON_PROJECT_STRUCTURE_API.services
         public async Task<responseData> EditProfile(requestData req)
         {
             responseData resData = new responseData();
-
+            resData.rData["rCode"] = 0;
+            resData.rData["rMessage"] = "Profile updated successfully";
             try
             {
+                string base64Image = req.addInfo["ProfilePic"].ToString();
+                byte[] imageBytes = Convert.FromBase64String(base64Image);
+
                 MySqlParameter[] para = new MySqlParameter[]
                 {
                     new MySqlParameter("@UserId", req.addInfo["UserId"].ToString()),
-                    new MySqlParameter("@ROLE_ID", req.addInfo["ROLE_ID"].ToString()),
-                    new MySqlParameter("@UserPassword", req.addInfo["UserPassword"].ToString()),
                     new MySqlParameter("@FirstName", req.addInfo["FirstName"].ToString()),
                     new MySqlParameter("@LastName", req.addInfo["LastName"].ToString()),
-                    new MySqlParameter("@EMAIL_ID", req.addInfo["EMAIL_ID"].ToString()),
-                    new MySqlParameter("@MOBILE_NO", req.addInfo["MOBILE_NO"].ToString())
+                    new MySqlParameter("@UserName", req.addInfo["UserName"].ToString()),
+                    new MySqlParameter("@Email", req.addInfo["Email"].ToString()),
+                    new MySqlParameter("@Mobile", req.addInfo["Mobile"].ToString()),
+                    new MySqlParameter("@ProfilePic", req.addInfo["ProfilePic"].ToString())
                 };
 
-                var updateSql = @"
-                    UPDATE pc_student.Alltraxs_users 
-                    SET ROLE_ID = @ROLE_ID, UserPassword = @UserPassword, 
-                    FirstName = @FirstName, LastName = @LastName, 
-                    EMAIL_ID = @EMAIL_ID, MOBILE_NO = @MOBILE_NO 
-                    WHERE UserId = @UserId
-                ";
+                var updateSql = @"UPDATE pc_student.Alltraxs_users 
+                                SET FirstName = @FirstName, LastName = @LastName, UserName = @UserName, Email = @Email, Mobile = @Mobile, ProfilePic = @ProfilePic 
+                                WHERE UserId = @UserId";
 
                 var rowsAffected = ds.ExecuteInsertAndGetLastId(updateSql, para);
-
                 if (rowsAffected > 0)
                 {
                     resData.eventID = req.eventID;
@@ -66,6 +69,17 @@ namespace COMMON_PROJECT_STRUCTURE_API.services
                         }
                     }
                 }
+                // if (rowsAffected > 0)
+                // {
+                //     resData.eventID = req.eventID;
+                //     resData.rData["rCode"] = 0;
+                //     resData.rData["rMessage"] = "Profile updated successfully";
+                // }
+                // else
+                // {
+                //     resData.rData["rCode"] = 2;
+                //     resData.rData["rMessage"] = "No user found with the provided UserId";
+                // }
             }
             catch (Exception ex)
             {
@@ -73,7 +87,6 @@ namespace COMMON_PROJECT_STRUCTURE_API.services
                 resData.rData["rCode"] = 1;
                 resData.rData["rMessage"] = $"Error: {ex.Message}";
             }
-
             return resData;
         }
     }

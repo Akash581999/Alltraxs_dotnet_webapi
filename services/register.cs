@@ -1,8 +1,13 @@
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
+using System;
 using System.Text;
+using System.Linq;
+using System.Security.Claims;
+using System.Threading.Tasks;
+using System.Collections.Generic;
+using System.IdentityModel.Tokens.Jwt;
 using System.Text.RegularExpressions;
 using Microsoft.IdentityModel.Tokens;
+using Org.BouncyCastle.Ocsp;
 using MySql.Data.MySqlClient;
 
 namespace COMMON_PROJECT_STRUCTURE_API.services
@@ -14,8 +19,7 @@ namespace COMMON_PROJECT_STRUCTURE_API.services
         {
             responseData resData = new responseData();
             resData.rData["rCode"] = 0;
-            resData.rData["rMessage"] = "Registered successfully";
-
+            resData.rData["rMessage"] = "User registered successfully!";
             try
             {
                 MySqlParameter[] para = new MySqlParameter[]
@@ -37,14 +41,19 @@ namespace COMMON_PROJECT_STRUCTURE_API.services
                 }
                 else
                 {
-                    var insertSql = $"INSERT INTO pc_student.Alltraxs_users (FirstName, LastName, Email, Mobile, UserPassword) VALUES(@FirstName, @LastName, @Email, @Mobile, @UserPassword);";
+                    var insertSql = @"INSERT INTO pc_student.Alltraxs_users (FirstName, LastName, Email, Mobile, UserPassword) 
+                                      VALUES(@FirstName, @LastName, @Email, @Mobile, @UserPassword);";
                     var insertId = ds.ExecuteInsertAndGetLastId(insertSql, para);
-
                     if (insertId != 0)
                     {
                         resData.eventID = req.eventID;
                         resData.rData["rCode"] = 0;
-                        resData.rData["rMessage"] = "Account created successfully";
+                        resData.rData["rMessage"] = "User registered successfully!";
+                    }
+                    else
+                    {
+                        resData.rData["rCode"] = 3;
+                        resData.rData["rMessage"] = "Some error occurred while registration!";
                     }
                 }
             }

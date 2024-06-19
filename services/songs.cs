@@ -1,10 +1,12 @@
 using System.Text;
-using System.Security.Claims;
+using System.Linq;
+using System.Collections;
 using System.Threading.Tasks;
+using System.Security.Claims;
+using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using System.IdentityModel.Tokens.Jwt;
 using Microsoft.IdentityModel.Tokens;
-using System.Collections;
 using MySql.Data.MySqlClient;
 
 namespace COMMON_PROJECT_STRUCTURE_API.services
@@ -20,7 +22,7 @@ namespace COMMON_PROJECT_STRUCTURE_API.services
             resData.rData["rCode"] = 0;
             try
             {
-                var query = @"SELECT * FROM pc_student.Alltraxs_Songs WHERE title=@title";
+                var query = @"SELECT * FROM pc_student.Alltraxs_Songs WHERE title=@title;";
                 MySqlParameter[] myParam = new MySqlParameter[]
                 {
                     new MySqlParameter("@title", rData.addInfo["title"])
@@ -35,7 +37,7 @@ namespace COMMON_PROJECT_STRUCTURE_API.services
                 else
                 {
                     var insertQuery = @"INSERT INTO pc_student.Alltraxs_Songs(title, artist, album, genre, duration, songUrl, songPic) 
-                                       VALUES (@title, @artist, @album, @genre, @duration, @songUrl, @songPic)";
+                                       VALUES (@title, @artist, @album, @genre, @duration, @songUrl, @songPic);";
                     MySqlParameter[] insertParams = new MySqlParameter[]
                     {
                         new MySqlParameter("@title", rData.addInfo["title"]),
@@ -79,20 +81,20 @@ namespace COMMON_PROJECT_STRUCTURE_API.services
             {
                 MySqlParameter[] para = new MySqlParameter[]
                 {
-                    new MySqlParameter("@SongId", req.addInfo["SongId"].ToString()),
+                    new MySqlParameter("@SongId", req.addInfo["SongId"].ToString())
                 };
 
-                var deleteSql = $"DELETE FROM pc_student.Alltraxs_Songs WHERE SongId = @SongId";
+                var deleteSql = $"DELETE FROM pc_student.Alltraxs_Songs WHERE SongId = @SongId;";
                 var rowsAffected = ds.ExecuteInsertAndGetLastId(deleteSql, para);
                 if (rowsAffected != 0)
                 {
-                    resData.rData["rCode"] = 0;
-                    resData.rData["rMessage"] = "Song deleted successfully.";
+                    resData.rData["rCode"] = 2;
+                    resData.rData["rMessage"] = "No song found with the provided ID.";
                 }
                 else
                 {
-                    resData.rData["rCode"] = 2;
-                    resData.rData["rMessage"] = "No song found with the provided ID.";
+                    resData.rData["rCode"] = 0;
+                    resData.rData["rMessage"] = "Song deleted successfully.";
                 }
             }
             catch (Exception ex)
@@ -109,7 +111,6 @@ namespace COMMON_PROJECT_STRUCTURE_API.services
             responseData resData = new responseData();
             resData.eventID = rData.eventID;
             resData.rData["rCode"] = 0;
-            resData.rData["rMessage"] = "Song found successfully!";
             try
             {
                 MySqlParameter[] myParams = new MySqlParameter[]
@@ -125,7 +126,7 @@ namespace COMMON_PROJECT_STRUCTURE_API.services
                 };
                 var query = @"UPDATE pc_student.Alltraxs_Songs
                               SET title = @title, artist = @artist, album = @album, genre = @genre, duration = @duration, songUrl = @songUrl, songPic = @songPic
-                              WHERE SongId = @SongId";
+                              WHERE SongId = @SongId;";
 
                 var data = ds.ExecuteInsertAndGetLastId(query, myParams);
                 if (data == null)
