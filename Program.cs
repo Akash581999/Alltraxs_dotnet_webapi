@@ -19,7 +19,7 @@ WebHost.CreateDefaultBuilder(args)
         services.AddSingleton<register>();
         services.AddSingleton<editProfile>();
         services.AddSingleton<changePassword>();
-        // services.AddSingleton<resetPassword>();
+        services.AddSingleton<resetPassword>();
         services.AddSingleton<deleteProfile>();
         services.AddSingleton<contactUs>();
         services.AddSingleton<songs>();
@@ -54,7 +54,7 @@ WebHost.CreateDefaultBuilder(args)
             var register = endpoints.ServiceProvider.GetRequiredService<register>();
             var editProfile = endpoints.ServiceProvider.GetRequiredService<editProfile>();
             var changePassword = endpoints.ServiceProvider.GetRequiredService<changePassword>();
-            // var resetPassword = endpoints.ServiceProvider.GetService<resetPassword>();
+            var resetPassword = endpoints.ServiceProvider.GetService<resetPassword>();
             var deleteProfile = endpoints.ServiceProvider.GetRequiredService<deleteProfile>();
             var contactUs = endpoints.ServiceProvider.GetRequiredService<contactUs>();
             var songs = endpoints.ServiceProvider.GetRequiredService<songs>();
@@ -96,14 +96,14 @@ WebHost.CreateDefaultBuilder(args)
                     await http.Response.WriteAsJsonAsync(await changePassword.ChangePassword(rData));
             });
 
-            // endpoints.MapPut("/resetPassword",
-            // [AllowAnonymous] async (HttpContext http) =>
-            // {
-            //     var body = await new StreamReader(http.Request.Body).ReadToEndAsync();
-            //     requestData rData = JsonSerializer.Deserialize<requestData>(body);
-            //     if (rData.eventID == "1005") // Update
-            //         await http.Response.WriteAsJsonAsync(await resetPassword.ResetPassword(rData));
-            // });
+            endpoints.MapPut("/resetPassword",
+            [AllowAnonymous] async (HttpContext http) =>
+            {
+                var body = await new StreamReader(http.Request.Body).ReadToEndAsync();
+                requestData rData = JsonSerializer.Deserialize<requestData>(body);
+                if (rData.eventID == "1005") // Update
+                    await http.Response.WriteAsJsonAsync(await resetPassword.ResetPassword(rData));
+            });
 
             endpoints.MapDelete("/deleteProfile",
             [AllowAnonymous] async (HttpContext http) =>
@@ -114,7 +114,7 @@ WebHost.CreateDefaultBuilder(args)
                     await http.Response.WriteAsJsonAsync(await deleteProfile.DeleteProfile(rData));
             });
 
-            endpoints.MapPost("/contactUs",
+            endpoints.MapPost("contactUs",
             [AllowAnonymous] async (HttpContext http) =>
             {
                 var body = await new StreamReader(http.Request.Body).ReadToEndAsync();

@@ -1,126 +1,72 @@
-// using System;
-// using System.Threading.Tasks;
-// using Microsoft.Extensions.Options;
-// using MySql.Data.MySqlClient;
-// using Twilio;
-// using Twilio.Types;
-// using Twilio.Rest.Api.V2010.Account;
+using System;
+using System.Threading.Tasks;
+using System.Security.Cryptography;
+using System.Text;
+using MySql.Data.MySqlClient;
 
-// namespace COMMON_PROJECT_STRUCTURE_API.services
-// {
-//     public class resetPassword
-//     {
-//         private readonly dbServices ds = new dbServices();
-//         private readonly serviceSmsSource ts;
+namespace COMMON_PROJECT_STRUCTURE_API.services
+{
+    public class resetPassword
+    {
+        dbServices ds = new dbServices();
 
-//         public resetPassword(IOptions<serviceSmsSource> twilioOptions, dbServices dbServices)
-//         {
-//             ds = dbServices;
-//             ts = twilioOptions.Value;
-//         }
-//         public async Task<responseData> ResetPassword(requestData req)
-//         {
-//             var resData = new responseData();
-//             resData.eventID = req.eventID;
-//             resData.rData["rCode"] = 1;
-//             try
-//             {
-//                 string userId = req.addInfo["UserId"].ToString();
-//                 string newPassword = req.addInfo["NewPassword"].ToString();
+        public async Task<responseData> ResetPassword(requestData req)
+        {
+            responseData resData = new responseData();
+            try
+            {
+                string userId = req.addInfo["UserId"].ToString();
+                string oldPassword = req.addInfo["UserPassword"].ToString();
+                string newPassword = req.addInfo["NewPassword"].ToString();
 
-//                 string otp = GenerateOTP();
+                // Check if the old password matches the one stored in the database
+                var sq = "SELECT * FROM pc_student.Alltraxs_users WHERE UserId = @UserId AND UserPassword = @UserPassword";
+                MySqlParameter[] para = new MySqlParameter[]
+                {
+                    new MySqlParameter("@UserId", userId),
+                    new MySqlParameter("@UserPassword", oldPassword)
+                };
+                var data = ds.ExecuteSQLName(sq, para);
 
-//                 bool otpSent = await SendOTPViaTwilio(userId, otp);
-//                 if (!otpSent)
-//                 {
-//                     resData.rData["rMessage"] = "Failed to send OTP via SMS";
-//                     return resData;
-//                 }
+                if (data == null || data[0].Count() == 0)
+                {
+                    // No matching user found with provided credentials
+                    resData.rData["rCode"] = 2;
+                    resData.rData["rMessage"] = "Invalid credentials";
+                }
+                else
+                {
+                    // Update the password in the database
+                    var resetSql = "UPDATE pc_student.Alltraxs_users SET UserPassword = @NewPassword WHERE UserId = @UserId";
+                    para = new MySqlParameter[]
+                    {
+                        new MySqlParameter("@UserId", userId),
+                        new MySqlParameter("@NewPassword", newPassword)
+                    };
+                    var rowsAffected = ds.ExecuteInsertAndGetLastId(resetSql, para);
 
-//                 resData.rData["rCode"] = 0;
-//                 resData.rData["rMessage"] = "OTP sent successfully";
-//                 resData.rData["otp"] = otp;
-//             }
-//             catch (Exception ex)
-//             {
-//                 resData.rData["rMessage"] = $"Error: {ex.Message}";
-//             }
-//             return resData;
-//         }
-
-//         public async Task<responseData> VerifyOTPAsync(requestData req)
-//         {
-//             var resData = new responseData();
-//             resData.rData["rCode"] = 1;
-//             try
-//             {
-//                 string otp = req.addInfo["otp"].ToString();
-
-//                 if (VerifyOTPinDatabase(otp))
-//                 {
-//                     string userId = req.addInfo["UserId"].ToString();
-//                     string newPassword = req.addInfo["NewPassword"].ToString();
-
-//                     string updateSql = "UPDATE pc_student.Alltraxs_users SET UserPassword = @NewPassword WHERE UserId = @UserId";
-//                     MySqlParameter[] parameters = new MySqlParameter[]
-//                     {
-//                         new MySqlParameter("@UserId", userId),
-//                         new MySqlParameter("@NewPassword", newPassword)
-//                     };
-//                     var rowsAffected = ds.executeSQLpcmdb(updateSql, parameters);
-
-//                     if (rowsAffected[0].Count() == 0)
-//                     {
-//                         resData.rData["rCode"] = 1;
-//                         resData.rData["rMessage"] = "Failed to update password";
-//                     }
-//                     else
-//                     {
-//                         resData.rData["rCode"] = 0;
-//                         resData.rData["rMessage"] = "Password updated successfully";
-//                     }
-//                 }
-//                 else
-//                 {
-//                     resData.rData["rCode"] = 1;
-//                     resData.rData["rMessage"] = "OTP verification failed";
-//                 }
-//             }
-//             catch (Exception ex)
-//             {
-//                 resData.rData["rMessage"] = $"Error: {ex.Message}";
-//             }
-//             return resData;
-//         }
-
-//         private string GenerateOTP()
-//         {
-//             Random random = new Random();
-//             return random.Next(100000, 999999).ToString();
-//         }
-
-//         private async Task<bool> SendOTPViaTwilio(string phoneNumber, string otp)
-//         {
-//             try
-//             {
-//                 TwilioClient.Init(ts.AccountSid, ts.AuthToken);
-//                 var message = await MessageResource.CreateAsync(
-//                     body: $"Your OTP for password reset is {otp}",
-//                     from: new PhoneNumber(ts.PhoneNumber),
-//                     to: new PhoneNumber(phoneNumber)
-//                 );
-//                 return true;
-//             }
-//             catch (Exception ex)
-//             {
-//                 Console.WriteLine($"Error sending OTP via Twilio: {ex.Message}");
-//                 return false;
-//             }
-//         }
-
-//         private bool VerifyOTPinDatabase(string otp)
-//         {
-//             return true;
-//         }
-//     }
-// }
+                    if (rowsAffected > 0)
+                    {
+                        // Password reset successful
+                        resData.rData["rCode"] = 0;
+                        resData.rData["rMessage"] = "Password reset successfully";
+                    }
+                    else
+                    {
+                        // No rows affected, probably due to incorrect password
+                        resData.rData["rCode"] = 3;
+                        resData.rData["rMessage"] = "Failed to reset password";
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                // Handle any exceptions
+                resData.rStatus = 404;
+                resData.rData["rCode"] = 1;
+                resData.rData["rMessage"] = $"Error: {ex.Message}";
+            }
+            return resData;
+        }
+    }
+}

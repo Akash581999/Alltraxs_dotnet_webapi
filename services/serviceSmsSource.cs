@@ -1,5 +1,7 @@
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
+using MySql.Data.MySqlClient;
 using Microsoft.Extensions.Configuration;
 using Twilio;
 using Twilio.Rest.Api.V2010.Account;
@@ -9,28 +11,36 @@ namespace COMMON_PROJECT_STRUCTURE_API.services
 {
     public class serviceSmsSource
     {
+        private readonly dbServices ds = new dbServices();
+        // private readonly serviceSmsSource Twilio = new serviceSmsSource();
+
         private readonly string _twilioAccountSid;
         private readonly string _twilioAuthToken;
         private readonly string _twilioPhoneNumber;
+
+        public serviceSmsSource()
+        {
+
+        }
 
         public serviceSmsSource(IConfiguration configuration)
         {
             _twilioAccountSid = configuration["Twilio:AccountSid"];
             _twilioAuthToken = configuration["Twilio:AuthToken"];
             _twilioPhoneNumber = configuration["Twilio:PhoneNumber"];
-
-            if (string.IsNullOrEmpty(_twilioAccountSid) || string.IsNullOrEmpty(_twilioAuthToken) || string.IsNullOrEmpty(_twilioPhoneNumber))
-            {
-                throw new InvalidOperationException("Twilio settings are missing or incomplete in appsettings.json.");
-            }
-
-            TwilioClient.Init(_twilioAccountSid, _twilioAuthToken);
         }
 
-        public async Task ServiceSmsSource(string phoneNumber, string message)
+        public async Task SendSmsAsync(string phoneNumber, string message)
         {
             try
             {
+                if (string.IsNullOrEmpty(_twilioAccountSid))
+                {
+                    Console.WriteLine("Twilio account SID is not configured.");
+                    return;
+                }
+                TwilioClient.Init(_twilioAccountSid, _twilioAuthToken);
+
                 var result = await MessageResource.CreateAsync(
                     body: message,
                     from: new PhoneNumber(_twilioPhoneNumber),
@@ -46,3 +56,9 @@ namespace COMMON_PROJECT_STRUCTURE_API.services
         }
     }
 }
+
+
+
+
+
+
