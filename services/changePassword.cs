@@ -13,7 +13,6 @@ namespace COMMON_PROJECT_STRUCTURE_API.services
         public async Task<responseData> ChangePassword(requestData req)
         {
             responseData resData = new responseData();
-            resData.eventID = req.eventID;
             resData.rData["rCode"] = 0;
             try
             {
@@ -59,6 +58,7 @@ namespace COMMON_PROJECT_STRUCTURE_API.services
                         }
                         else
                         {
+                            resData.eventID = req.eventID;
                             resData.rData["rCode"] = 0;
                             resData.rData["rMessage"] = "Password changed successfully";
                         }
