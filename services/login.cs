@@ -65,6 +65,7 @@ namespace COMMON_PROJECT_STRUCTURE_API.services
                 }
                 else
                 {
+                    resData.eventID = req.eventID;
                     resData.rData["rCode"] = 0;
                     resData.rData["rMessage"] = "Login Successfully, Welcome!";
                 }

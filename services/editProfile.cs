@@ -38,13 +38,11 @@ namespace COMMON_PROJECT_STRUCTURE_API.services
                 var updateSql = @"UPDATE pc_student.Alltraxs_users 
                                 SET FirstName = @FirstName, LastName = @LastName, UserName = @UserName, Email = @Email, Mobile = @Mobile, ProfilePic = @ProfilePic 
                                 WHERE UserId = @UserId";
-
                 var rowsAffected = ds.ExecuteInsertAndGetLastId(updateSql, para);
-                if (rowsAffected > 0)
+                if (rowsAffected != 0)
                 {
                     resData.eventID = req.eventID;
                     resData.rData["rCode"] = 0;
-                    resData.rData["rMessage"] = "Profile updated successfully";
                 }
                 else
                 {
@@ -59,6 +57,7 @@ namespace COMMON_PROJECT_STRUCTURE_API.services
 
                         if (changesDetected = true)
                         {
+                            resData.eventID = req.eventID;
                             resData.rData["rCode"] = 0;
                             resData.rData["rMessage"] = "Profile updated successfully";
                         }
@@ -69,17 +68,6 @@ namespace COMMON_PROJECT_STRUCTURE_API.services
                         }
                     }
                 }
-                // if (rowsAffected > 0)
-                // {
-                //     resData.eventID = req.eventID;
-                //     resData.rData["rCode"] = 0;
-                //     resData.rData["rMessage"] = "Profile updated successfully";
-                // }
-                // else
-                // {
-                //     resData.rData["rCode"] = 2;
-                //     resData.rData["rMessage"] = "No user found with the provided UserId";
-                // }
             }
             catch (Exception ex)
             {

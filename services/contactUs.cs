@@ -14,8 +14,6 @@ namespace COMMON_PROJECT_STRUCTURE_API.services
         {
             responseData resData = new responseData();
             resData.rData["rCode"] = 0;
-            resData.rData["rMessage"] = "Feedback sent successfully";
-
             try
             {
                 MySqlParameter[] para = new MySqlParameter[]
@@ -32,7 +30,7 @@ namespace COMMON_PROJECT_STRUCTURE_API.services
                 if (checkResult == null || checkResult[0].Count() == 0)
                 {
                     resData.rData["rCode"] = 2;
-                    resData.rData["rMessage"] = "Email not found in our records. Please register first!";
+                    resData.rData["rMessage"] = "Email or Username not found, Please register first!";
                 }
                 else
                 {
@@ -41,12 +39,12 @@ namespace COMMON_PROJECT_STRUCTURE_API.services
 
                     if (insertId != 0)
                     {
+                        resData.eventID = req.eventID;
                         resData.rData["rCode"] = 0;
                         resData.rData["rMessage"] = "Thank you for your response";
                     }
                     else
                     {
-                        resData.eventID = req.eventID;
                         resData.rData["rCode"] = 1;
                         resData.rData["rMessage"] = "Failed to submit feedback";
                     }

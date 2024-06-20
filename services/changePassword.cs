@@ -20,26 +20,32 @@ namespace COMMON_PROJECT_STRUCTURE_API.services
                 string UserId = req.addInfo["UserId"].ToString();
                 string UserPassword = req.addInfo["UserPassword"].ToString();
                 string NewPassword = req.addInfo["NewPassword"].ToString();
+                string ConfirmPassword = req.addInfo["UserPassword"].ToString();
 
-                if (UserPassword == NewPassword)
+                MySqlParameter[] parameters = new MySqlParameter[]
                 {
-                    resData.rData["rCode"] = 1;
-                    resData.rData["rMessage"] = "New password must be different from the current password";
+                    new MySqlParameter("@UserId", UserId),
+                    new MySqlParameter("@UserPassword", UserPassword),
+                    new MySqlParameter("@NewPassword", NewPassword),
+                    new MySqlParameter("@ConfirmPassword", ConfirmPassword)
+                };
+                if (UserPassword == NewPassword && UserPassword == ConfirmPassword)
+                {
+                    resData.rData["rCode"] = 2;
+                    resData.rData["rMessage"] = "Password already exists, set a different password!";
+                }
+                else if (NewPassword == ConfirmPassword)
+                {
+                    resData.rData["rCode"] = 3;
+                    resData.rData["rMessage"] = "New password and confirm password must be same!";
                 }
                 else
                 {
-                    MySqlParameter[] parameters = new MySqlParameter[]
-                    {
-                        new MySqlParameter("@UserId", UserId),
-                        new MySqlParameter("@NewPassword", NewPassword),
-                        new MySqlParameter("@UserPassword", UserPassword)
-                    };
-
-                    var checkSql = $"SELECT * FROM pc_student.Alltraxs_users WHERE UserId=@UserId AND UserPassword=@UserPassword;";
+                    var checkSql = $"SELECT * FROM pc_student.Alltraxs_users WHERE UserId=@UserId AND UserPassword = @UserPassword;";
                     var checkResult = ds.executeSQL(checkSql, parameters);
                     if (checkResult[0].Count() == 0)
                     {
-                        resData.rData["rCode"] = 2;
+                        resData.rData["rCode"] = 4;
                         resData.rData["rMessage"] = "Wrong credentials, enter valid details!";
                     }
                     else
@@ -48,7 +54,7 @@ namespace COMMON_PROJECT_STRUCTURE_API.services
                         var rowsAffected = ds.executeSQL(updateSql, parameters);
                         if (rowsAffected[0].Count() != 0)
                         {
-                            resData.rData["rCode"] = 3;
+                            resData.rData["rCode"] = 5;
                             resData.rData["rMessage"] = "Password didnt changed!";
                         }
                         else

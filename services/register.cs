@@ -19,7 +19,6 @@ namespace COMMON_PROJECT_STRUCTURE_API.services
         {
             responseData resData = new responseData();
             resData.rData["rCode"] = 0;
-            resData.rData["rMessage"] = "User registered successfully!";
             try
             {
                 MySqlParameter[] para = new MySqlParameter[]
