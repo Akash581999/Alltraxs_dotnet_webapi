@@ -24,6 +24,7 @@ WebHost.CreateDefaultBuilder(args)
         services.AddSingleton<contactUs>();
         services.AddSingleton<songs>();
         services.AddSingleton<playlists>();
+        services.AddSingleton<playlistSongs>();
 
         services.AddAuthorization();
         services.AddControllers();
@@ -59,6 +60,7 @@ WebHost.CreateDefaultBuilder(args)
             var contactUs = endpoints.ServiceProvider.GetRequiredService<contactUs>();
             var songs = endpoints.ServiceProvider.GetRequiredService<songs>();
             var playlists = endpoints.ServiceProvider.GetRequiredService<playlists>();
+            var playlistSongs = endpoints.ServiceProvider.GetRequiredService<playlistSongs>();
 
             endpoints.MapPost("/login",
             [AllowAnonymous] async (HttpContext http) =>
@@ -192,22 +194,24 @@ WebHost.CreateDefaultBuilder(args)
                     await http.Response.WriteAsJsonAsync(await playlists.GetPlaylist(rData));
             });
 
-            // endpoints.MapGet("/addtoplaylist/id",
-            // [AllowAnonymous] async (HttpContext http) =>
-            // {
-            //     var body = await new StreamReader(http.Request.Body).ReadToEndAsync();
-            //     requestData rData = JsonSerializer.Deserialize<requestData>(body);
-            //     if (rData.eventID == "1015") // Add song to playlist
-            //         await http.Response.WriteAsJsonAsync(await playlists.GetPlaylist(rData));
-            // });
-            // endpoints.MapGet("/removefromplaylist/id",
-            // [AllowAnonymous] async (HttpContext http) =>
-            // {
-            //     var body = await new StreamReader(http.Request.Body).ReadToEndAsync();
-            //     requestData rData = JsonSerializer.Deserialize<requestData>(body);
-            //     if (rData.eventID == "1015") // Remove song from playlist
-            //         await http.Response.WriteAsJsonAsync(await playlists.GetPlaylist(rData));
-            // });
+            //Endponits for playlist songs
+            endpoints.MapPost("/playlistSongs",
+            [AllowAnonymous] async (HttpContext http) =>
+            {
+                var body = await new StreamReader(http.Request.Body).ReadToEndAsync();
+                requestData rData = JsonSerializer.Deserialize<requestData>(body);
+                if (rData.eventID == "1016") // Add song to playlist
+                    await http.Response.WriteAsJsonAsync(await playlistSongs.AddToPlaylist(rData));
+            });
+
+            endpoints.MapDelete("/playlistSongs/id",
+            [AllowAnonymous] async (HttpContext http) =>
+            {
+                var body = await new StreamReader(http.Request.Body).ReadToEndAsync();
+                requestData rData = JsonSerializer.Deserialize<requestData>(body);
+                if (rData.eventID == "1017") // Remove song from playlist
+                    await http.Response.WriteAsJsonAsync(await playlistSongs.RemoveFromPlaylist(rData));
+            });
 
             endpoints.MapGet("/bing",
                  async c => await c.Response.WriteAsJsonAsync("{'Name':'Akash','Age':'24','Project':'AllTraxs_Music_Webapp'}"));

@@ -19,13 +19,13 @@ namespace COMMON_PROJECT_STRUCTURE_API.services
             try
             {
                 MySqlParameter[] myParam = new MySqlParameter[]
-                    {
-                        new MySqlParameter("@UserId", rData.addInfo["UserId"]),
-                        new MySqlParameter("@Title", rData.addInfo["Title"]),
-                        new MySqlParameter("@Description", rData.addInfo["Description"]),
-                        new MySqlParameter("@PlaylistImageUrl", rData.addInfo["PlaylistImageUrl"]),
-                        new MySqlParameter("@IsPublic", rData.addInfo["IsPublic"]),
-                    };
+                {
+                    new MySqlParameter("@UserId", rData.addInfo["UserId"]),
+                    new MySqlParameter("@Title", rData.addInfo["Title"]),
+                    new MySqlParameter("@Description", rData.addInfo["Description"]),
+                    new MySqlParameter("@PlaylistImageUrl", rData.addInfo["PlaylistImageUrl"]),
+                    new MySqlParameter("@IsPublic", rData.addInfo["IsPublic"]),
+                };
 
                 var query = @"SELECT * FROM pc_student.Alltraxs_Playlists WHERE Title=@Title;";
                 var dbData = ds.ExecuteSQLName(query, myParam);
