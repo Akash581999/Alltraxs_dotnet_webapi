@@ -65,7 +65,7 @@ WebHost.CreateDefaultBuilder(args)
             {
                 var body = await new StreamReader(http.Request.Body).ReadToEndAsync();
                 requestData rData = JsonSerializer.Deserialize<requestData>(body);
-                if (rData.eventID == "1001") // Read
+                if (rData.eventID == "1001") // Login
                     await http.Response.WriteAsJsonAsync(await login.Login(rData));
             }).RequireAuthorization();
 
@@ -74,7 +74,7 @@ WebHost.CreateDefaultBuilder(args)
             {
                 var body = await new StreamReader(http.Request.Body).ReadToEndAsync();
                 requestData rData = JsonSerializer.Deserialize<requestData>(body);
-                if (rData.eventID == "1002") // Write
+                if (rData.eventID == "1002") // Register
                     await http.Response.WriteAsJsonAsync(await register.Register(rData));
             }).RequireAuthorization();
 
@@ -83,7 +83,7 @@ WebHost.CreateDefaultBuilder(args)
             {
                 var body = await new StreamReader(http.Request.Body).ReadToEndAsync();
                 requestData rData = JsonSerializer.Deserialize<requestData>(body);
-                if (rData.eventID == "1003") // Update
+                if (rData.eventID == "1003") // Edit
                     await http.Response.WriteAsJsonAsync(await editProfile.EditProfile(rData));
             });
 
@@ -92,7 +92,7 @@ WebHost.CreateDefaultBuilder(args)
             {
                 var body = await new StreamReader(http.Request.Body).ReadToEndAsync();
                 requestData rData = JsonSerializer.Deserialize<requestData>(body);
-                if (rData.eventID == "1004") // Update
+                if (rData.eventID == "1004") // Change
                     await http.Response.WriteAsJsonAsync(await changePassword.ChangePassword(rData));
             });
 
@@ -101,7 +101,7 @@ WebHost.CreateDefaultBuilder(args)
             {
                 var body = await new StreamReader(http.Request.Body).ReadToEndAsync();
                 requestData rData = JsonSerializer.Deserialize<requestData>(body);
-                if (rData.eventID == "1005") // Update
+                if (rData.eventID == "1005") // Reset
                     await http.Response.WriteAsJsonAsync(await resetPassword.ResetPassword(rData));
             });
 
@@ -119,7 +119,7 @@ WebHost.CreateDefaultBuilder(args)
             {
                 var body = await new StreamReader(http.Request.Body).ReadToEndAsync();
                 requestData rData = JsonSerializer.Deserialize<requestData>(body);
-                if (rData.eventID == "1007") // Contact us
+                if (rData.eventID == "1007") // Contact
                     await http.Response.WriteAsJsonAsync(await contactUs.ContactUs(rData));
             });
 
@@ -129,7 +129,7 @@ WebHost.CreateDefaultBuilder(args)
             {
                 var body = await new StreamReader(http.Request.Body).ReadToEndAsync();
                 requestData rData = JsonSerializer.Deserialize<requestData>(body);
-                if (rData.eventID == "1008") // Post song
+                if (rData.eventID == "1008") // Add song
                     await http.Response.WriteAsJsonAsync(await songs.PostSong(rData));
             });
             endpoints.MapDelete("/songs/id",
@@ -145,7 +145,7 @@ WebHost.CreateDefaultBuilder(args)
             {
                 var body = await new StreamReader(http.Request.Body).ReadToEndAsync();
                 requestData rData = JsonSerializer.Deserialize<requestData>(body);
-                if (rData.eventID == "1010") // Update song
+                if (rData.eventID == "1010") // Edit song
                     await http.Response.WriteAsJsonAsync(await songs.UpdateSong(rData));
             });
             endpoints.MapGet("/songs/id",

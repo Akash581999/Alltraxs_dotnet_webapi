@@ -49,6 +49,7 @@ namespace COMMON_PROJECT_STRUCTURE_API.services
             }
             catch (Exception ex)
             {
+                resData.rStatus = 402;
                 resData.rData["rCode"] = 1;
                 resData.rData["rMessage"] = $"Error: {ex.Message}";
             }

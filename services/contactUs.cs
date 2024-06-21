@@ -30,7 +30,7 @@ namespace COMMON_PROJECT_STRUCTURE_API.services
                 if (checkResult == null || checkResult[0].Count() == 0)
                 {
                     resData.rData["rCode"] = 2;
-                    resData.rData["rMessage"] = "Email or Username not found, Please register first!";
+                    resData.rData["rMessage"] = "Email or Username not found, Please enter valid details!";
                 }
                 else
                 {
@@ -45,13 +45,14 @@ namespace COMMON_PROJECT_STRUCTURE_API.services
                     }
                     else
                     {
-                        resData.rData["rCode"] = 1;
+                        resData.rData["rCode"] = 3;
                         resData.rData["rMessage"] = "Failed to submit feedback";
                     }
                 }
             }
             catch (Exception ex)
             {
+                resData.rStatus = 402;
                 resData.rData["rCode"] = 1;
                 resData.rData["rMessage"] = $"Error: {ex.Message}";
             }
