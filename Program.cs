@@ -192,6 +192,23 @@ WebHost.CreateDefaultBuilder(args)
                     await http.Response.WriteAsJsonAsync(await playlists.GetPlaylist(rData));
             });
 
+            // endpoints.MapGet("/addtoplaylist/id",
+            // [AllowAnonymous] async (HttpContext http) =>
+            // {
+            //     var body = await new StreamReader(http.Request.Body).ReadToEndAsync();
+            //     requestData rData = JsonSerializer.Deserialize<requestData>(body);
+            //     if (rData.eventID == "1015") // Add song to playlist
+            //         await http.Response.WriteAsJsonAsync(await playlists.GetPlaylist(rData));
+            // });
+            // endpoints.MapGet("/removefromplaylist/id",
+            // [AllowAnonymous] async (HttpContext http) =>
+            // {
+            //     var body = await new StreamReader(http.Request.Body).ReadToEndAsync();
+            //     requestData rData = JsonSerializer.Deserialize<requestData>(body);
+            //     if (rData.eventID == "1015") // Remove song from playlist
+            //         await http.Response.WriteAsJsonAsync(await playlists.GetPlaylist(rData));
+            // });
+
             endpoints.MapGet("/bing",
                  async c => await c.Response.WriteAsJsonAsync("{'Name':'Akash','Age':'24','Project':'AllTraxs_Music_Webapp'}"));
         });

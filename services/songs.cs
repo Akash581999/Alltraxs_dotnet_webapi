@@ -180,24 +180,25 @@ namespace COMMON_PROJECT_STRUCTURE_API.services
                 string SongId = req.addInfo["SongId"].ToString();
                 string Title = req.addInfo["Title"].ToString();
                 string Artist = req.addInfo["Artist"].ToString();
+
                 MySqlParameter[] myParams = new MySqlParameter[]
                 {
-                    new("@SongId", MySqlDbType.VarChar) { Value = SongId },
-                    new("@Title", MySqlDbType.VarChar) { Value = Title },
-                    new("@Artist", MySqlDbType.VarChar) { Value = Artist }
+                    new MySqlParameter("@SongId", req.addInfo["SongId"]),
+                    new MySqlParameter("@Title", req.addInfo["Title"]),
+                    new MySqlParameter("@Artist", req.addInfo["Artist"])
                 };
 
-                string sql = $"SELECT * FROM pc_student.Alltraxs_Songs " +
+                string getsql = $"SELECT * FROM pc_student.Alltraxs_Songs " +
                              "WHERE SongId = @SongId OR Title = @Title OR Artist = @Artist;";
-                var data = ds.ExecuteSQLName(sql, myParams);
-                if (data == null || data.Count() == 0)
+                var songdata = ds.ExecuteSQLName(getsql, myParams);
+                if (songdata == null || songdata.Count == 0 || songdata[0].Count() == 0)
                 {
                     resData.rData["rCode"] = 2;
                     resData.rData["rMessage"] = "Song not found!";
                 }
                 else
                 {
-                    var songData = data[0][0];
+                    var songData = songdata[0][0];
                     resData.rData["SongId"] = songData["SongId"];
                     resData.rData["Title"] = songData["Title"];
                     resData.rData["Artist"] = songData["Artist"];

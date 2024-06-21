@@ -15,27 +15,10 @@ namespace COMMON_PROJECT_STRUCTURE_API.services
         public async Task<responseData> CreatePlaylist(requestData rData)
         {
             responseData resData = new responseData();
-            resData.eventID = rData.eventID;
             resData.rData["rCode"] = 0;
             try
             {
-                var query = @"SELECT * FROM pc_student.Alltraxs_Playlists WHERE Title=@Title;";
                 MySqlParameter[] myParam = new MySqlParameter[]
-                {
-                    new MySqlParameter("@Title", rData.addInfo["Title"])
-                };
-
-                var dbData = ds.ExecuteSQLName(query, myParam);
-                if (dbData[0].Count() != 0)
-                {
-                    resData.rData["rCode"] = 2;
-                    resData.rData["rMessage"] = "Playlist with this name already exists.";
-                }
-                else
-                {
-                    var insertQuery = @"INSERT INTO pc_student.Alltraxs_Playlists(UserId, Title, Description, PlaylistImageUrl, IsPublic) 
-                                       VALUES (@UserId, @Title, @Description, @PlaylistImageUrl, @IsPublic);";
-                    MySqlParameter[] insertParams = new MySqlParameter[]
                     {
                         new MySqlParameter("@UserId", rData.addInfo["UserId"]),
                         new MySqlParameter("@Title", rData.addInfo["Title"]),
@@ -44,23 +27,34 @@ namespace COMMON_PROJECT_STRUCTURE_API.services
                         new MySqlParameter("@IsPublic", rData.addInfo["IsPublic"]),
                     };
 
-                    int rowsAffected = ds.ExecuteInsertAndGetLastId(insertQuery, insertParams);
+                var query = @"SELECT * FROM pc_student.Alltraxs_Playlists WHERE Title=@Title;";
+                var dbData = ds.ExecuteSQLName(query, myParam);
+                if (dbData[0].Count() != 0)
+                {
+                    resData.rData["rCode"] = 2;
+                    resData.rData["rMessage"] = "Playlist with this name already exists!";
+                }
+                else
+                {
+                    var insertQuery = @"INSERT INTO pc_student.Alltraxs_Playlists(UserId, Title, Description, PlaylistImageUrl, IsPublic) 
+                                       VALUES (@UserId, @Title, @Description, @PlaylistImageUrl, @IsPublic);";
+                    int rowsAffected = ds.ExecuteInsertAndGetLastId(insertQuery, myParam);
                     if (rowsAffected > 0)
                     {
                         resData.eventID = rData.eventID;
                         resData.rData["rCode"] = 0;
-                        resData.rData["rMessage"] = "Playlist added successfully.";
+                        resData.rData["rMessage"] = "Playlist created successfully.";
                     }
                     else
                     {
                         resData.rData["rCode"] = 3;
-                        resData.rData["rMessage"] = "Failed to add playlist.";
+                        resData.rData["rMessage"] = "Failed to created playlist!";
                     }
                 }
             }
             catch (Exception ex)
             {
-                resData.rStatus = 404;
+                resData.rStatus = 402;
                 resData.rData["rCode"] = 1;
                 resData.rData["rMessage"] = $"Error: {ex.Message}";
             }
@@ -70,31 +64,42 @@ namespace COMMON_PROJECT_STRUCTURE_API.services
         public async Task<responseData> DeletePlaylist(requestData rData)
         {
             responseData resData = new responseData();
-            resData.eventID = rData.eventID;
             resData.rData["rCode"] = 0;
             try
             {
                 MySqlParameter[] myParam = new MySqlParameter[]
                 {
-                    new MySqlParameter("@Playlist_Id", rData.addInfo["Playlist_Id"].ToString())
+                    new MySqlParameter("@Playlist_Id", rData.addInfo["Playlist_Id"].ToString()),
+                    new MySqlParameter("@Title", rData.addInfo["Title"].ToString())
                 };
 
-                var query = $"DELETE FROM pc_student.Alltraxs_Playlists WHERE Playlist_Id = @Playlist_Id;";
-                int rowsAffected = ds.ExecuteInsertAndGetLastId(query, myParam);
-                if (rowsAffected > 0)
+                var query = @"SELECT * FROM pc_student.Alltraxs_Playlists WHERE Title=@Title AND Playlist_Id=@Playlist_Id;";
+                var dbData = ds.ExecuteSQLName(query, myParam);
+                if (dbData[0].Count() == 0)
                 {
                     resData.rData["rCode"] = 2;
-                    resData.rData["rMessage"] = "No playlist found with the provided ID.";
+                    resData.rData["rMessage"] = "Playlist not found!!.";
                 }
                 else
                 {
-                    resData.rData["rCode"] = 0;
-                    resData.rData["rMessage"] = "Playlist deleted successfully.";
+                    var delquery = $"DELETE FROM pc_student.Alltraxs_Playlists WHERE Title = @Title;";
+                    int rowsAffected = ds.ExecuteInsertAndGetLastId(delquery, myParam);
+                    if (rowsAffected == 0)
+                    {
+                        resData.rData["rCode"] = 3;
+                        resData.rData["rMessage"] = "Some error occurred, could'nt delete playlist!";
+                    }
+                    else
+                    {
+                        resData.eventID = rData.eventID;
+                        resData.rData["rCode"] = 0;
+                        resData.rData["rMessage"] = "Playlist deleted successfully.";
+                    }
                 }
             }
             catch (Exception ex)
             {
-                resData.rStatus = 404;
+                resData.rStatus = 402;
                 resData.rData["rCode"] = 1;
                 resData.rData["rMessage"] = $"Error: {ex.Message}";
             }
@@ -104,7 +109,6 @@ namespace COMMON_PROJECT_STRUCTURE_API.services
         public async Task<responseData> UpdatePlaylist(requestData rData)
         {
             responseData resData = new responseData();
-            resData.eventID = rData.eventID;
             resData.rData["rCode"] = 0;
             try
             {
@@ -115,26 +119,37 @@ namespace COMMON_PROJECT_STRUCTURE_API.services
                     new MySqlParameter("@Description", rData.addInfo["Description"]),
                     new MySqlParameter("@PlaylistImageUrl", rData.addInfo["PlaylistImageUrl"]),
                     new MySqlParameter("@IsPublic", rData.addInfo["IsPublic"]),
+                    new MySqlParameter("@NumSongs", rData.addInfo["NumSongs"])
                 };
-
-                var query = @"UPDATE pc_student.Alltraxs_Playlists
-                              SET Title = @Title, Description = @Description, PlaylistImageUrl = @PlaylistImageUrl, IsPublic = @IsPublic
-                              WHERE Playlist_Id = @Playlist_Id;";
-                int rowsAffected = ds.ExecuteInsertAndGetLastId(query, myParam);
-                if (rowsAffected > 0)
+                var query = @"SELECT * FROM pc_student.Alltraxs_Playlists WHERE Playlist_Id=@Playlist_Id;";
+                var dbData = ds.ExecuteSQLName(query, myParam);
+                if (dbData[0].Count() == 0)
                 {
                     resData.rData["rCode"] = 2;
-                    resData.rData["rMessage"] = "No playlist found with the provided ID.";
+                    resData.rData["rMessage"] = "Playlist not found!!.";
                 }
                 else
                 {
-                    resData.rData["rCode"] = 0;
-                    resData.rData["rMessage"] = "Playlist updated successfully.";
+                    var updatequery = @"UPDATE pc_student.Alltraxs_Playlists
+                                        SET Title = @Title, Description = @Description, PlaylistImageUrl = @PlaylistImageUrl, IsPublic = @IsPublic, NumSongs=@NumSongs
+                                        WHERE Playlist_Id = @Playlist_Id;";
+                    int rowsAffected = ds.ExecuteInsertAndGetLastId(updatequery, myParam);
+                    if (rowsAffected != 0)
+                    {
+                        resData.rData["rCode"] = 3;
+                        resData.rData["rMessage"] = "Some error occured, could'nt update playlist!";
+                    }
+                    else
+                    {
+                        resData.eventID = rData.eventID;
+                        resData.rData["rCode"] = 0;
+                        resData.rData["rMessage"] = "Playlist updated successfully.";
+                    }
                 }
             }
             catch (Exception ex)
             {
-                resData.rStatus = 404;
+                resData.rStatus = 402;
                 resData.rData["rCode"] = 1;
                 resData.rData["rMessage"] = $"Error: {ex.Message}";
             }
@@ -147,39 +162,44 @@ namespace COMMON_PROJECT_STRUCTURE_API.services
             resData.eventID = req.eventID;
             resData.rData["rCode"] = 0;
             resData.rData["rMessage"] = "Playlist found successfully!";
-
             try
             {
-                var list = new ArrayList();
+                string Playlist_Id = req.addInfo["Playlist_Id"].ToString();
+                string Title = req.addInfo["Title"].ToString();
+                string Description = req.addInfo["Description"].ToString();
+
                 MySqlParameter[] myParams = new MySqlParameter[]
                 {
                     new MySqlParameter("@Playlist_Id", req.addInfo["Playlist_Id"]),
+                    new MySqlParameter("@Title", req.addInfo["Title"]),
+                    new MySqlParameter("@Description", req.addInfo["Description"])
                 };
 
-                var sq = $"SELECT * FROM pc_student.Alltraxs_Playlists WHERE Playlist_Id=@Playlist_Id;";
-                var data = ds.ExecuteSQLName(sq, myParams);
-                if (data == null || data[0].Count() == 0)
+                string getsql = $"SELECT * FROM pc_student.Alltraxs_Playlists " +
+                             "WHERE Playlist_Id = @Playlist_Id OR Title = @Title OR Description = @Description;";
+                var playlistdata = ds.ExecuteSQLName(getsql, myParams);
+                if (playlistdata == null || playlistdata.Count == 0 || playlistdata[0].Count() == 0)
                 {
                     resData.rData["rCode"] = 2;
-                    resData.rData["rMessage"] = "No playlist found!";
+                    resData.rData["rMessage"] = "Playlist not found!";
                 }
                 else
                 {
-                    resData.rData["Playlist_Id"] = data[0][0]["Playlist_Id"];
-                    resData.rData["UserId"] = data[0][0]["UserId"];
-                    resData.rData["Title"] = data[0][0]["Title"];
-                    resData.rData["Description"] = data[0][0]["Description"];
-                    resData.rData["CreatedOn"] = data[0][0]["CreatedOn"];
-                    resData.rData["PlaylistImageUrl"] = data[0][0]["PlaylistImageUrl"];
-                    resData.rData["IsPublic"] = data[0][0]["IsPublic"];
-                    resData.rData["NumSongs"] = data[0][0]["NumSongs"];
+                    resData.rData["Playlist_Id"] = playlistdata[0][0]["Playlist_Id"];
+                    resData.rData["UserId"] = playlistdata[0][0]["UserId"];
+                    resData.rData["Title"] = playlistdata[0][0]["Title"];
+                    resData.rData["Description"] = playlistdata[0][0]["Description"];
+                    resData.rData["CreatedOn"] = playlistdata[0][0]["CreatedOn"];
+                    resData.rData["PlaylistImageUrl"] = playlistdata[0][0]["PlaylistImageUrl"];
+                    resData.rData["IsPublic"] = playlistdata[0][0]["IsPublic"];
+                    resData.rData["NumSongs"] = playlistdata[0][0]["NumSongs"];
                 }
             }
             catch (Exception ex)
             {
-                resData.rStatus = 404;
+                resData.rStatus = 402;
                 resData.rData["rCode"] = 1;
-                resData.rData["rMessage"] = $"Error: {ex.Message}";
+                resData.rData["rMessage"] = ex + "Enter correct playlist name or description!";
             }
             return resData;
         }
