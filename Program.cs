@@ -116,7 +116,7 @@ WebHost.CreateDefaultBuilder(args)
                     await http.Response.WriteAsJsonAsync(await deleteProfile.DeleteProfile(rData));
             });
 
-            endpoints.MapPost("contactUs",
+            endpoints.MapPost("/contactUs",
             [AllowAnonymous] async (HttpContext http) =>
             {
                 var body = await new StreamReader(http.Request.Body).ReadToEndAsync();

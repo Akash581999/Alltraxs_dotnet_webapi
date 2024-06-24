@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\akash2.kumar\\Desktop\\Alltraxs_dotnet_webapi\\COMMON_PROJECT_STRUCTURE_API.csproj": {}
+    "C:\\Users\\akash2.kumar\\Desktop\\Alltraxs-music-app\\Alltraxs_dotnet_webapi\\COMMON_PROJECT_STRUCTURE_API.csproj": {}
   },
   "projects": {
-    "C:\\Users\\akash2.kumar\\Desktop\\Alltraxs_dotnet_webapi\\COMMON_PROJECT_STRUCTURE_API.csproj": {
+    "C:\\Users\\akash2.kumar\\Desktop\\Alltraxs-music-app\\Alltraxs_dotnet_webapi\\COMMON_PROJECT_STRUCTURE_API.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\akash2.kumar\\Desktop\\Alltraxs_dotnet_webapi\\COMMON_PROJECT_STRUCTURE_API.csproj",
+        "projectUniqueName": "C:\\Users\\akash2.kumar\\Desktop\\Alltraxs-music-app\\Alltraxs_dotnet_webapi\\COMMON_PROJECT_STRUCTURE_API.csproj",
         "projectName": "COMMON_PROJECT_STRUCTURE_API",
-        "projectPath": "C:\\Users\\akash2.kumar\\Desktop\\Alltraxs_dotnet_webapi\\COMMON_PROJECT_STRUCTURE_API.csproj",
+        "projectPath": "C:\\Users\\akash2.kumar\\Desktop\\Alltraxs-music-app\\Alltraxs_dotnet_webapi\\COMMON_PROJECT_STRUCTURE_API.csproj",
         "packagesPath": "C:\\Users\\akash2.kumar\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\akash2.kumar\\Desktop\\Alltraxs_dotnet_webapi\\obj\\",
+        "outputPath": "C:\\Users\\akash2.kumar\\Desktop\\Alltraxs-music-app\\Alltraxs_dotnet_webapi\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\akash2.kumar\\AppData\\Roaming\\NuGet\\NuGet.Config",

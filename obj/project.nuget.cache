@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "IYJEFK0e3fp9+ICTpf0oEEKKZ7LdWlBvvgebehRMLVPpqXpyRe1EAYk6ebhZEQiSVhJt3iyAGQKlJOconj6VKQ==",
+  "dgSpecHash": "6ORTjlOlG3jfd6Pe/184HLi8mbsLBP2jpImu2S/ljlAiIpqmZ8+/DML09iSSBYtPOs/F6TnlxpDN9sRJBUNH7A==",
   "success": true,
-  "projectFilePath": "C:\\Users\\akash2.kumar\\Desktop\\Alltraxs_dotnet_webapi\\COMMON_PROJECT_STRUCTURE_API.csproj",
+  "projectFilePath": "C:\\Users\\akash2.kumar\\Desktop\\Alltraxs-music-app\\Alltraxs_dotnet_webapi\\COMMON_PROJECT_STRUCTURE_API.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\akash2.kumar\\.nuget\\packages\\awssdk.core\\3.7.100.14\\awssdk.core.3.7.100.14.nupkg.sha512",
     "C:\\Users\\akash2.kumar\\.nuget\\packages\\awssdk.securitytoken\\3.7.100.14\\awssdk.securitytoken.3.7.100.14.nupkg.sha512",
@@ -71,10 +71,10 @@
     "C:\\Users\\akash2.kumar\\.nuget\\packages\\system.windows.extensions\\4.7.0\\system.windows.extensions.4.7.0.nupkg.sha512",
     "C:\\Users\\akash2.kumar\\.nuget\\packages\\twilio\\7.2.0\\twilio.7.2.0.nupkg.sha512",
     "C:\\Users\\akash2.kumar\\.nuget\\packages\\zstdsharp.port\\0.6.2\\zstdsharp.port.0.6.2.nupkg.sha512",
-    "C:\\Users\\akash2.kumar\\.nuget\\packages\\microsoft.aspnetcore.app.ref\\6.0.29\\microsoft.aspnetcore.app.ref.6.0.29.nupkg.sha512",
-    "C:\\Users\\akash2.kumar\\.nuget\\packages\\microsoft.netcore.app.host.win-x64\\6.0.29\\microsoft.netcore.app.host.win-x64.6.0.29.nupkg.sha512",
     "C:\\Users\\akash2.kumar\\.nuget\\packages\\microsoft.netcore.app.ref\\6.0.29\\microsoft.netcore.app.ref.6.0.29.nupkg.sha512",
-    "C:\\Users\\akash2.kumar\\.nuget\\packages\\microsoft.windowsdesktop.app.ref\\6.0.29\\microsoft.windowsdesktop.app.ref.6.0.29.nupkg.sha512"
+    "C:\\Users\\akash2.kumar\\.nuget\\packages\\microsoft.windowsdesktop.app.ref\\6.0.29\\microsoft.windowsdesktop.app.ref.6.0.29.nupkg.sha512",
+    "C:\\Users\\akash2.kumar\\.nuget\\packages\\microsoft.aspnetcore.app.ref\\6.0.29\\microsoft.aspnetcore.app.ref.6.0.29.nupkg.sha512",
+    "C:\\Users\\akash2.kumar\\.nuget\\packages\\microsoft.netcore.app.host.win-x64\\6.0.29\\microsoft.netcore.app.host.win-x64.6.0.29.nupkg.sha512"
   ],
   "logs": [
     {
