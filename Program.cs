@@ -36,6 +36,25 @@ WebHost.CreateDefaultBuilder(args)
                options.ValidAudience = appsettings["jwt_config:Audience"].ToString();
                options.Subject = appsettings["jwt_config:Subject"].ToString();
            });
+        // services.AddAuthentication(options =>
+        // {
+        //     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+        //     options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+        // })
+        // .AddJwtBearer(options =>
+        // {
+        //     options.TokenValidationParameters = new TokenValidationParameters
+        //     {
+        //         ValidateIssuer = true,
+        //         ValidateAudience = true,
+        //         ValidateLifetime = true,
+        //         ValidateIssuerSigningKey = true,
+        //         ValidIssuer = jwt_config.Issuer,  // Ensure jwt_config.Issuer is correctly set in appsettings.json
+        //         ValidAudience = jwt_config.Audience,  // Ensure jwt_config.Audience is correctly set in appsettings.json
+        //         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwt_config.Key))  // Ensure jwt_config.Key is correctly set in appsettings.json
+        //     };
+        // });
+
     })
     .Configure(app =>
     {
