@@ -20,15 +20,15 @@ namespace COMMON_PROJECT_STRUCTURE_API.services
             resData.rData["rCode"] = 0;
             try
             {
-                string UserId = rData.addInfo["UserId"].ToString();
-                string SongId = rData.addInfo["SongId"].ToString();
-                string Playlist_Id = rData.addInfo["Playlist_Id"].ToString();
+                // string UserId = rData.addInfo["UserId"].ToString();
+                // string SongId = rData.addInfo["SongId"].ToString();
+                // string Playlist_Id = rData.addInfo["Playlist_Id"].ToString();
 
                 MySqlParameter[] insertParams = new MySqlParameter[]
                 {
-                    new MySqlParameter("@UserId", UserId.ToString()),
-                    new MySqlParameter("@SongId", SongId.ToString()),
-                    new MySqlParameter("@Playlist_Id", Playlist_Id.ToString()),
+                    // new MySqlParameter("@UserId", UserId.ToString()),
+                    // new MySqlParameter("@SongId", SongId.ToString()),
+                    // new MySqlParameter("@Playlist_Id", Playlist_Id.ToString()),
                     new MySqlParameter("@Title", rData.addInfo["Title"].ToString()),
                     new MySqlParameter("@Artist", rData.addInfo["Artist"].ToString()),
                     new MySqlParameter("@Album", rData.addInfo["Album"].ToString()),
@@ -37,21 +37,29 @@ namespace COMMON_PROJECT_STRUCTURE_API.services
                     new MySqlParameter("@SongUrl", rData.addInfo["SongUrl"].ToString()),
                     new MySqlParameter("@SongPic", rData.addInfo["SongPic"].ToString()),
                 };
-
-                var insertQuery = @"INSERT INTO pc_student.Alltraxs_PlaylistSongs(Title, Artist, Album, Genre, Duration, SongUrl, SongPic, UserId, SongId, Playlist_Id)
-                                    VALUES (@Title, @Artist, @Album, @Genre, @Duration, @SongUrl, @SongPic, @UserId, @SongId, @Playlist_Id);";
-
-                int rowsAffected = ds.ExecuteInsertAndGetLastId(insertQuery, insertParams);
-                if (rowsAffected > 0)
+                var query = @"SELECT * FROM pc_student.Alltraxs_PlaylistSongs WHERE Title=@Title;";
+                var dbData = ds.ExecuteSQLName(query, insertParams);
+                if (dbData[0].Count() != 0)
                 {
-                    resData.eventID = rData.eventID;
-                    resData.rData["rCode"] = 0;
-                    resData.rData["rMessage"] = "Song added to playlist.";
+                    resData.rData["rCode"] = 2;
+                    resData.rData["rMessage"] = "Song already added in playlist!";
                 }
                 else
                 {
-                    resData.rData["rCode"] = 3;
-                    resData.rData["rMessage"] = "Failed to add song in playlist!";
+                    var insertQuery = @"INSERT INTO pc_student.Alltraxs_PlaylistSongs(Title, Artist, Album, Genre, Duration, SongUrl, SongPic)
+                                    VALUES (@Title, @Artist, @Album, @Genre, @Duration, @SongUrl, @SongPic);";
+                    int rowsAffected = ds.ExecuteInsertAndGetLastId(insertQuery, insertParams);
+                    if (rowsAffected == 0)
+                    {
+                        resData.rData["rCode"] = 3;
+                        resData.rData["rMessage"] = "Failed to add song in playlist!";
+                    }
+                    else
+                    {
+                        resData.eventID = rData.eventID;
+                        resData.rData["rCode"] = 0;
+                        resData.rData["rMessage"] = "Song added to playlist.";
+                    }
                 }
             }
             catch (Exception ex)
@@ -96,7 +104,7 @@ namespace COMMON_PROJECT_STRUCTURE_API.services
                     {
                         resData.eventID = rData.eventID;
                         resData.rData["rCode"] = 0;
-                        resData.rData["rMessage"] = "Song remove from playlist.";
+                        resData.rData["rMessage"] = "Song removed from playlist.";
                     }
                 }
             }
