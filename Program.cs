@@ -169,7 +169,7 @@ WebHost.CreateDefaultBuilder(args)
                 if (rData.eventID == "1010") // Edit song
                     await http.Response.WriteAsJsonAsync(await songs.UpdateSong(rData));
             });
-            endpoints.MapGet("/songs/id",
+            endpoints.MapPost("/songs/id",
             [AllowAnonymous] async (HttpContext http) =>
             {
                 var body = await new StreamReader(http.Request.Body).ReadToEndAsync();
