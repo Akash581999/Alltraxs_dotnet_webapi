@@ -34,8 +34,8 @@ namespace COMMON_PROJECT_STRUCTURE_API.services
                 }
                 else
                 {
-                    var insertQuery = @"INSERT INTO pc_student.Alltraxs_Songs(title, artist, album, genre, duration, songUrl, songPic) 
-                                       VALUES (@title, @artist, @album, @genre, @duration, @songUrl, @songPic);";
+                    var insertQuery = @"INSERT INTO pc_student.Alltraxs_Songs(title, artist, album, genre, duration, popularity, songUrl, songPic) 
+                                       VALUES (@title, @artist, @album, @genre, @duration, @popularity, @songUrl, @songPic);";
                     MySqlParameter[] insertParams = new MySqlParameter[]
                     {
                         new MySqlParameter("@title", rData.addInfo["title"]),
@@ -43,6 +43,7 @@ namespace COMMON_PROJECT_STRUCTURE_API.services
                         new MySqlParameter("@album", rData.addInfo["album"]),
                         new MySqlParameter("@genre", rData.addInfo["genre"]),
                         new MySqlParameter("@duration", rData.addInfo["duration"]),
+                        new MySqlParameter("@popularity", rData.addInfo["popularity"]),
                         new MySqlParameter("@songUrl", rData.addInfo["songUrl"]),
                         new MySqlParameter("@songPic", rData.addInfo["songPic"]),
                     };
@@ -129,6 +130,7 @@ namespace COMMON_PROJECT_STRUCTURE_API.services
                     new MySqlParameter("@album", rData.addInfo["album"]),
                     new MySqlParameter("@genre", rData.addInfo["genre"]),
                     new MySqlParameter("@duration", rData.addInfo["duration"]),
+                    new MySqlParameter("@popularity", rData.addInfo["popularity"]),
                     new MySqlParameter("@songUrl", rData.addInfo["songUrl"]),
                     new MySqlParameter("@songPic", rData.addInfo["songPic"]),
                     new MySqlParameter("@popularity", rData.addInfo["popularity"]),
@@ -144,7 +146,7 @@ namespace COMMON_PROJECT_STRUCTURE_API.services
                 else
                 {
                     var updatequery = @"UPDATE pc_student.Alltraxs_Songs
-                              SET title = @title, artist = @artist, album = @album, genre = @genre, duration = @duration, songUrl = @songUrl, songPic = @songPic, popularity=@popularity
+                              SET title = @title, artist = @artist, album = @album, genre = @genre, duration = @duration, popularity = @popularity, songUrl = @songUrl, songPic = @songPic, popularity=@popularity
                               WHERE SongId = @SongId;";
                     var updatedata = ds.ExecuteInsertAndGetLastId(updatequery, myParams);
                     if (updatedata != 0)
@@ -205,9 +207,9 @@ namespace COMMON_PROJECT_STRUCTURE_API.services
                     resData.rData["Album"] = songData["Album"];
                     resData.rData["Genre"] = songData["Genre"];
                     resData.rData["Duration"] = songData["Duration"];
+                    resData.rData["Popularity"] = songData["Popularity"];
                     resData.rData["SongUrl"] = songData["SongUrl"];
                     resData.rData["SongPic"] = songData["SongPic"];
-                    resData.rData["Popularity"] = songData["Popularity"];
                 }
             }
             catch (Exception ex)
