@@ -116,5 +116,125 @@ namespace COMMON_PROJECT_STRUCTURE_API.services
             }
             return resData;
         }
+
+
+        public async Task<responseData> GetSongFromPlaylist(requestData req)
+        {
+            responseData resData = new responseData();
+            resData.rData["rCode"] = 0;
+            resData.eventID = req.eventID;
+            resData.rData["rMessage"] = "Song found successfully!";
+            try
+            {
+                // string SongId = req.addInfo["SongId"].ToString();
+                string Title = req.addInfo["Title"].ToString();
+                string Artist = req.addInfo["Artist"].ToString();
+
+                MySqlParameter[] myParams = new MySqlParameter[]
+                {
+                    // new MySqlParameter("@SongId", req.addInfo["SongId"]),
+                    new MySqlParameter("@Title", req.addInfo["Title"]),
+                    new MySqlParameter("@Artist", req.addInfo["Artist"])
+                };
+
+                string getsql = $"SELECT * FROM pc_student.Alltraxs_PlaylistSongs " +
+                             "WHERE Title = @Title OR Artist = @Artist;";
+                var songdata = ds.ExecuteSQLName(getsql, myParams);
+                if (songdata == null || songdata.Count == 0 || songdata[0].Count() == 0)
+                {
+                    resData.rData["rCode"] = 2;
+                    resData.rData["rMessage"] = "Song not found!";
+                }
+                else
+                {
+                    var songData = songdata[0][0];
+                    resData.rData["Id"] = songData["Id"];
+                    resData.rData["Title"] = songData["Title"];
+                    resData.rData["Artist"] = songData["Artist"];
+                    resData.rData["Album"] = songData["Album"];
+                    resData.rData["Genre"] = songData["Genre"];
+                    resData.rData["Duration"] = songData["Duration"];
+                    resData.rData["SongUrl"] = songData["SongUrl"];
+                    resData.rData["SongPic"] = songData["SongPic"];
+                    resData.rData["UserId"] = songData["UserId"];
+                    resData.rData["SongId"] = songData["SongId"];
+                    resData.rData["Playlist_Id"] = songData["Playlist_Id"];
+                    // resData.rData["Popularity"] = songData["Popularity"];
+                }
+            }
+            catch (Exception ex)
+            {
+                resData.rStatus = 402;
+                resData.rData["rCode"] = 1;
+                resData.rData["rMessage"] = ex + "Some exception occurred, cant get song!";
+            }
+            return resData;
+        }
+
+        public async Task<responseData> GetAllPlaylistSongs(requestData req)
+        {
+            responseData resData = new responseData();
+            resData.rData["rCode"] = 0;
+            resData.eventID = req.eventID;
+            try
+            {
+                var query = @"SELECT * FROM pc_student.Alltraxs_PlaylistSongs ORDER BY Id ASC";
+                var dbData = ds.executeSQL(query, null);
+                if (dbData == null)
+                {
+                    resData.rData["rMessage"] = "Some error occurred, can't get all playlist songs!";
+                    resData.rStatus = 1;
+                    return resData;
+                }
+
+                List<object> playlistsongs = new List<object>();
+                foreach (var rowSet in dbData)
+                {
+                    if (rowSet != null)
+                    {
+                        foreach (var row in rowSet)
+                        {
+                            if (row != null)
+                            {
+                                List<string> rowData = new List<string>();
+
+                                foreach (var column in row)
+                                {
+                                    if (column != null)
+                                    {
+                                        rowData.Add(column.ToString());
+                                    }
+                                }
+                                var playlistsongsdata = new
+                                {
+                                    Id = rowData.ElementAtOrDefault(0),
+                                    Title = rowData.ElementAtOrDefault(1),
+                                    Artist = rowData.ElementAtOrDefault(2),
+                                    Album = rowData.ElementAtOrDefault(3),
+                                    Genre = rowData.ElementAtOrDefault(4),
+                                    Duration = rowData.ElementAtOrDefault(5),
+                                    SongUrl = rowData.ElementAtOrDefault(6),
+                                    SongPic = rowData.ElementAtOrDefault(7),
+                                    UserId = rowData.ElementAtOrDefault(8),
+                                    SongId = rowData.ElementAtOrDefault(9),
+                                    Playlist_Id = rowData.ElementAtOrDefault(10),
+                                };
+                                playlistsongs.Add(playlistsongsdata);
+                            }
+                        }
+                    }
+                }
+                resData.rData["rCode"] = 0;
+                resData.rData["rMessage"] = "All Playlist songs found successfully";
+                resData.rData["playlistsongsdata"] = playlistsongs;
+            }
+            catch (Exception ex)
+            {
+                resData.rStatus = 402;
+                resData.rData["rCode"] = 1;
+                resData.rData["rMessage"] = $"Exception occured: {ex.Message}";
+            }
+            return resData;
+        }
     }
 }

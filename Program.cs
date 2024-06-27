@@ -25,6 +25,7 @@ WebHost.CreateDefaultBuilder(args)
         services.AddSingleton<songs>();
         services.AddSingleton<playlists>();
         services.AddSingleton<playlistSongs>();
+        services.AddSingleton<users>();
 
         services.AddAuthorization();
         services.AddControllers();
@@ -80,6 +81,7 @@ WebHost.CreateDefaultBuilder(args)
             var songs = endpoints.ServiceProvider.GetRequiredService<songs>();
             var playlists = endpoints.ServiceProvider.GetRequiredService<playlists>();
             var playlistSongs = endpoints.ServiceProvider.GetRequiredService<playlistSongs>();
+            var users = endpoints.ServiceProvider.GetRequiredService<users>();
 
             endpoints.MapPost("/login",
             [AllowAnonymous] async (HttpContext http) =>
@@ -177,7 +179,14 @@ WebHost.CreateDefaultBuilder(args)
                 if (rData.eventID == "1011") // Get song
                     await http.Response.WriteAsJsonAsync(await songs.GetSong(rData));
             });
-
+            endpoints.MapPost("/allsongs",
+            [AllowAnonymous] async (HttpContext http) =>
+            {
+                var body = await new StreamReader(http.Request.Body).ReadToEndAsync();
+                requestData rData = JsonSerializer.Deserialize<requestData>(body);
+                if (rData.eventID == "1020") // Get all songs
+                    await http.Response.WriteAsJsonAsync(await songs.GetAllSongs(rData));
+            });
 
             //Endponits for playlists
             endpoints.MapPost("/playlists",
@@ -212,6 +221,14 @@ WebHost.CreateDefaultBuilder(args)
                 if (rData.eventID == "1015") // Get playlist
                     await http.Response.WriteAsJsonAsync(await playlists.GetPlaylist(rData));
             });
+            endpoints.MapPost("/allplaylists",
+            [AllowAnonymous] async (HttpContext http) =>
+            {
+                var body = await new StreamReader(http.Request.Body).ReadToEndAsync();
+                requestData rData = JsonSerializer.Deserialize<requestData>(body);
+                if (rData.eventID == "1021") // Get all playlists
+                    await http.Response.WriteAsJsonAsync(await playlists.GetAllPlaylists(rData));
+            });
 
             //Endponits for playlist songs
             endpoints.MapPost("/playlistSongs",
@@ -230,6 +247,33 @@ WebHost.CreateDefaultBuilder(args)
                 requestData rData = JsonSerializer.Deserialize<requestData>(body);
                 if (rData.eventID == "1017") // Remove song from playlist
                     await http.Response.WriteAsJsonAsync(await playlistSongs.RemoveFromPlaylist(rData));
+            });
+            endpoints.MapPost("/allplaylistsongs",
+            [AllowAnonymous] async (HttpContext http) =>
+            {
+                var body = await new StreamReader(http.Request.Body).ReadToEndAsync();
+                requestData rData = JsonSerializer.Deserialize<requestData>(body);
+                if (rData.eventID == "1022") // Get all playlist songs
+                    await http.Response.WriteAsJsonAsync(await playlistSongs.GetAllPlaylistSongs(rData));
+            });
+
+            //Endponits for get user details
+            endpoints.MapPost("/users",
+            [AllowAnonymous] async (HttpContext http) =>
+            {
+                var body = await new StreamReader(http.Request.Body).ReadToEndAsync();
+                requestData rData = JsonSerializer.Deserialize<requestData>(body);
+                if (rData.eventID == "1018") // Get all users
+                    await http.Response.WriteAsJsonAsync(await users.GetAllUsers(rData));
+            });
+
+            endpoints.MapPost("/users/id",
+            [AllowAnonymous] async (HttpContext http) =>
+            {
+                var body = await new StreamReader(http.Request.Body).ReadToEndAsync();
+                requestData rData = JsonSerializer.Deserialize<requestData>(body);
+                if (rData.eventID == "1019") // Get user by Id
+                    await http.Response.WriteAsJsonAsync(await users.GetUserById(rData));
             });
 
             endpoints.MapGet("/bing",

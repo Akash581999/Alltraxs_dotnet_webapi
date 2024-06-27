@@ -203,5 +203,68 @@ namespace COMMON_PROJECT_STRUCTURE_API.services
             }
             return resData;
         }
+
+        public async Task<responseData> GetAllPlaylists(requestData req)
+        {
+            responseData resData = new responseData();
+            resData.rData["rCode"] = 0;
+            resData.eventID = req.eventID;
+            try
+            {
+                var query = @"SELECT * FROM pc_student.Alltraxs_Playlists ORDER BY Playlist_Id ASC";
+                var dbData = ds.executeSQL(query, null);
+                if (dbData == null)
+                {
+                    resData.rData["rMessage"] = "Some error occurred, can't get all playlists!";
+                    resData.rStatus = 1;
+                    return resData;
+                }
+
+                List<object> playlists = new List<object>();
+                foreach (var rowSet in dbData)
+                {
+                    if (rowSet != null)
+                    {
+                        foreach (var row in rowSet)
+                        {
+                            if (row != null)
+                            {
+                                List<string> rowData = new List<string>();
+
+                                foreach (var column in row)
+                                {
+                                    if (column != null)
+                                    {
+                                        rowData.Add(column.ToString());
+                                    }
+                                }
+                                var playlistsdata = new
+                                {
+                                    Playlist_Id = rowData.ElementAtOrDefault(0),
+                                    UserId = rowData.ElementAtOrDefault(1),
+                                    Title = rowData.ElementAtOrDefault(2),
+                                    Description = rowData.ElementAtOrDefault(3),
+                                    CreatedOn = rowData.ElementAtOrDefault(4),
+                                    PlaylistImageUrl = rowData.ElementAtOrDefault(5),
+                                    IsPublic = rowData.ElementAtOrDefault(6),
+                                    NumSongs = rowData.ElementAtOrDefault(7),
+                                };
+                                playlists.Add(playlistsdata);
+                            }
+                        }
+                    }
+                }
+                resData.rData["rCode"] = 0;
+                resData.rData["rMessage"] = "All Playlists found successfully";
+                resData.rData["playlistsdata"] = playlists;
+            }
+            catch (Exception ex)
+            {
+                resData.rStatus = 402;
+                resData.rData["rCode"] = 1;
+                resData.rData["rMessage"] = $"Exception occured: {ex.Message}";
+            }
+            return resData;
+        }
     }
 }

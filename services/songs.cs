@@ -174,8 +174,8 @@ namespace COMMON_PROJECT_STRUCTURE_API.services
         public async Task<responseData> GetSong(requestData req)
         {
             responseData resData = new responseData();
-            resData.eventID = req.eventID;
             resData.rData["rCode"] = 0;
+            resData.eventID = req.eventID;
             resData.rData["rMessage"] = "Song found successfully!";
             try
             {
@@ -217,6 +217,71 @@ namespace COMMON_PROJECT_STRUCTURE_API.services
                 resData.rStatus = 402;
                 resData.rData["rCode"] = 1;
                 resData.rData["rMessage"] = ex + "Enter correct song or artist name!";
+            }
+            return resData;
+        }
+
+        public async Task<responseData> GetAllSongs(requestData req)
+        {
+            responseData resData = new responseData();
+            resData.rData["rCode"] = 0;
+            resData.eventID = req.eventID;
+            try
+            {
+                var query = @"SELECT * FROM pc_student.Alltraxs_Songs ORDER BY SongId ASC";
+                var dbData = ds.executeSQL(query, null);
+                if (dbData == null)
+                {
+                    resData.rData["rMessage"] = "Some error occurred, can't get all songs!";
+                    resData.rStatus = 1;
+                    return resData;
+                }
+
+                List<object> songslist = new List<object>();
+                foreach (var rowSet in dbData)
+                {
+                    if (rowSet != null)
+                    {
+                        foreach (var row in rowSet)
+                        {
+                            if (row != null)
+                            {
+                                List<string> rowData = new List<string>();
+
+                                foreach (var column in row)
+                                {
+                                    if (column != null)
+                                    {
+                                        rowData.Add(column.ToString());
+                                    }
+                                }
+                                var songs = new
+                                {
+                                    SongId = rowData.ElementAtOrDefault(0),
+                                    Title = rowData.ElementAtOrDefault(1),
+                                    Artist = rowData.ElementAtOrDefault(2),
+                                    Album = rowData.ElementAtOrDefault(3),
+                                    Genre = rowData.ElementAtOrDefault(4),
+                                    Duration = rowData.ElementAtOrDefault(5),
+                                    SongUrl = rowData.ElementAtOrDefault(6),
+                                    SongPic = rowData.ElementAtOrDefault(7),
+                                    Popularity = rowData.ElementAtOrDefault(8),
+                                    UploadOn = rowData.ElementAtOrDefault(9)
+                                };
+                                songslist.Add(songs);
+                            }
+                        }
+                    }
+                }
+                resData.rData["rCode"] = 0;
+                resData.rData["rMessage"] = "All Songs found successfully";
+                resData.rData["songs"] = songslist;
+            }
+            catch (Exception ex)
+            {
+                resData.rStatus = 402;
+                resData.rData["rCode"] = 1;
+                resData.rData["rMessage"] = $"Exception occured: {ex.Message}";
             }
             return resData;
         }

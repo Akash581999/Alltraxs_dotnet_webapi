@@ -18,11 +18,10 @@ namespace COMMON_PROJECT_STRUCTURE_API.services
         {
             responseData resData = new responseData();
             resData.rData["rCode"] = 0;
-            resData.rData["rMessage"] = "Profile updated successfully";
             try
             {
-                string base64Image = req.addInfo["ProfilePic"].ToString();
-                byte[] imageBytes = Convert.FromBase64String(base64Image);
+                // string base64Image = req.addInfo["ProfilePic"].ToString();
+                // byte[] ProfilePic = Convert.FromBase64String(base64Image);
 
                 MySqlParameter[] para = new MySqlParameter[]
                 {
@@ -36,7 +35,7 @@ namespace COMMON_PROJECT_STRUCTURE_API.services
                 };
 
                 var updateSql = @"UPDATE pc_student.Alltraxs_users 
-                                SET FirstName = @FirstName, LastName = @LastName, UserName = @UserName, Email = @Email, Mobile = @Mobile, ProfilePic = @ProfilePic 
+                                SET FirstName = @FirstName, LastName = @LastName, UserName = @UserName, Email = @Email, Mobile = @Mobile," + @" ProfilePic = @ProfilePic 
                                 WHERE UserId = @UserId";
                 var rowsAffected = ds.ExecuteInsertAndGetLastId(updateSql, para);
                 if (rowsAffected != 0)
@@ -47,9 +46,7 @@ namespace COMMON_PROJECT_STRUCTURE_API.services
                 else
                 {
                     var selectSql = @"SELECT * FROM pc_student.Alltraxs_users WHERE UserId = @UserId";
-
                     var existingDataList = ds.ExecuteSQLName(selectSql, para);
-
                     if (existingDataList != null && existingDataList.Count > 0)
                     {
                         var currentData = existingDataList[0];
@@ -71,7 +68,7 @@ namespace COMMON_PROJECT_STRUCTURE_API.services
             }
             catch (Exception ex)
             {
-                resData.rStatus = 404;
+                resData.rStatus = 402;
                 resData.rData["rCode"] = 1;
                 resData.rData["rMessage"] = $"Error: {ex.Message}";
             }
