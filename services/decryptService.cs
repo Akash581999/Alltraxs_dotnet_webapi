@@ -17,7 +17,7 @@ using Org.BouncyCastle.Security;
 public class decryptService
 {
 
-    IConfiguration appsettings = new ConfigurationBuilder().AddJsonFile("appsettings.json").Build();
+    readonly IConfiguration appsettings = new ConfigurationBuilder().AddJsonFile("appsettings.json").Build();
 
     //private readonly string SERVER_PRIVATE_KEY_UTI;
     public string getHash(string stringToCompute)

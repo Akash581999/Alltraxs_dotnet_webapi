@@ -58,5 +58,66 @@ namespace COMMON_PROJECT_STRUCTURE_API.services
             }
             return resData;
         }
+
+        public async Task<responseData> GetAllFeedbacks(requestData req)
+        {
+            responseData resData = new responseData();
+            resData.rData["rCode"] = 0;
+            resData.eventID = req.eventID;
+            try
+            {
+                var query = @"SELECT * FROM pc_student.Alltraxs_ContactUs ORDER BY Feedback_Id DESC";
+                var dbData = ds.executeSQL(query, null);
+                if (dbData == null)
+                {
+                    resData.rData["rMessage"] = "Some error occurred, can't get all feedbacks!";
+                    resData.rStatus = 1;
+                    return resData;
+                }
+
+                List<object> feedbackslist = new List<object>();
+                foreach (var rowSet in dbData)
+                {
+                    if (rowSet != null)
+                    {
+                        foreach (var row in rowSet)
+                        {
+                            if (row != null)
+                            {
+                                List<string> rowData = new List<string>();
+
+                                foreach (var column in row)
+                                {
+                                    if (column != null)
+                                    {
+                                        rowData.Add(column.ToString());
+                                    }
+                                }
+                                var feedback = new
+                                {
+                                    Feedback_Id = rowData.ElementAtOrDefault(0),
+                                    UserName = rowData.ElementAtOrDefault(1),
+                                    Email = rowData.ElementAtOrDefault(2),
+                                    Country = rowData.ElementAtOrDefault(3),
+                                    Comments = rowData.ElementAtOrDefault(4),
+                                    CreatedAt = rowData.ElementAtOrDefault(5),
+                                };
+                                feedbackslist.Add(feedback);
+                            }
+                        }
+                    }
+                }
+                resData.rData["rCode"] = 0;
+                resData.rData["rMessage"] = "All feedbacks retrieved successfully";
+                resData.rData["feedback"] = feedbackslist;
+            }
+            catch (Exception ex)
+            {
+                resData.rStatus = 402;
+                resData.rData["rCode"] = 1;
+                resData.rData["rMessage"] = $"Exception occured: {ex.Message}";
+            }
+            return resData;
+        }
     }
 }

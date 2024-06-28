@@ -126,19 +126,19 @@ namespace COMMON_PROJECT_STRUCTURE_API.services
             resData.rData["rMessage"] = "Song found successfully!";
             try
             {
-                // string SongId = req.addInfo["SongId"].ToString();
+                string Id = req.addInfo["Id"].ToString();
                 string Title = req.addInfo["Title"].ToString();
                 string Artist = req.addInfo["Artist"].ToString();
 
                 MySqlParameter[] myParams = new MySqlParameter[]
                 {
-                    // new MySqlParameter("@SongId", req.addInfo["SongId"]),
+                    new MySqlParameter("@Id", req.addInfo["Id"]),
                     new MySqlParameter("@Title", req.addInfo["Title"]),
                     new MySqlParameter("@Artist", req.addInfo["Artist"])
                 };
 
                 string getsql = $"SELECT * FROM pc_student.Alltraxs_PlaylistSongs " +
-                             "WHERE Title = @Title OR Artist = @Artist;";
+                             "WHERE Id=@Id OR Title = @Title OR Artist = @Artist;";
                 var songdata = ds.ExecuteSQLName(getsql, myParams);
                 if (songdata == null || songdata.Count == 0 || songdata[0].Count() == 0)
                 {

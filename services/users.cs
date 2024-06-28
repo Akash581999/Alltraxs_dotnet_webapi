@@ -54,9 +54,11 @@ namespace COMMON_PROJECT_STRUCTURE_API.services
                                     FirstName = rowData.ElementAtOrDefault(1),
                                     LastName = rowData.ElementAtOrDefault(2),
                                     UserName = rowData.ElementAtOrDefault(3),
-                                    Email = rowData.ElementAtOrDefault(4),
-                                    Mobile = rowData.ElementAtOrDefault(5),
-                                    ProfilePic = rowData.ElementAtOrDefault(6),
+                                    UserPassword = rowData.ElementAtOrDefault(4),
+                                    Email = rowData.ElementAtOrDefault(5),
+                                    Mobile = rowData.ElementAtOrDefault(6),
+                                    ProfilePic = rowData.ElementAtOrDefault(7),
+                                    CreatedOn = rowData.ElementAtOrDefault(8),
                                 };
                                 usersList.Add(user);
                             }
@@ -118,25 +120,25 @@ namespace COMMON_PROJECT_STRUCTURE_API.services
             return resData;
         }
 
-        public bool CheckPhoneNumberExists(string phoneNumber)
-        {
-            try
-            {
-                using (MySqlConnection connection = new MySqlConnection("server=210.210.210.50;user=test_user;password=test*123;port=2020;database=pc_student;"))
-                {
-                    connection.Open();
-                    string query = "SELECT COUNT(*) FROM Kapil_signup WHERE phone = @phone";
-                    MySqlCommand command = new MySqlCommand(query, connection);
-                    command.Parameters.AddWithValue("@phone", phoneNumber);
-                    int count = Convert.ToInt32(command.ExecuteScalar());
-                    return count > 0;
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine("Error while executing query: " + ex.Message);
-                return false;
-            }
-        }
+        // public bool CheckPhoneNumberExists(string phoneNumber)
+        // {
+        //     try
+        //     {
+        //         using (MySqlConnection connection = new MySqlConnection("server=210.210.210.50;user=test_user;password=test*123;port=2020;database=pc_student;"))
+        //         {
+        //             connection.Open();
+        //             string query = "SELECT COUNT(*) FROM Kapil_signup WHERE phone = @phone";
+        //             MySqlCommand command = new MySqlCommand(query, connection);
+        //             command.Parameters.AddWithValue("@phone", phoneNumber);
+        //             int count = Convert.ToInt32(command.ExecuteScalar());
+        //             return count > 0;
+        //         }
+        //     }
+        //     catch (Exception ex)
+        //     {
+        //         Console.WriteLine("Error while executing query: " + ex.Message);
+        //         return false;
+        //     }
+        // }
     }
 }

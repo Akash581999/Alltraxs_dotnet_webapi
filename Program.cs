@@ -137,13 +137,22 @@ WebHost.CreateDefaultBuilder(args)
                     await http.Response.WriteAsJsonAsync(await deleteProfile.DeleteProfile(rData));
             });
 
+            //Endponits for contact us
             endpoints.MapPost("/contactUs",
             [AllowAnonymous] async (HttpContext http) =>
             {
                 var body = await new StreamReader(http.Request.Body).ReadToEndAsync();
                 requestData rData = JsonSerializer.Deserialize<requestData>(body);
-                if (rData.eventID == "1007") // Contact
+                if (rData.eventID == "1007") // Contact us
                     await http.Response.WriteAsJsonAsync(await contactUs.ContactUs(rData));
+            });
+            endpoints.MapPost("/allfeedbacks",
+            [AllowAnonymous] async (HttpContext http) =>
+            {
+                var body = await new StreamReader(http.Request.Body).ReadToEndAsync();
+                requestData rData = JsonSerializer.Deserialize<requestData>(body);
+                if (rData.eventID == "1024") // Feedbacks
+                    await http.Response.WriteAsJsonAsync(await contactUs.GetAllFeedbacks(rData));
             });
 
             //Endponits for songs
@@ -256,9 +265,17 @@ WebHost.CreateDefaultBuilder(args)
                 if (rData.eventID == "1022") // Get all playlist songs
                     await http.Response.WriteAsJsonAsync(await playlistSongs.GetAllPlaylistSongs(rData));
             });
+            endpoints.MapPost("/playlistSongs/song",
+            [AllowAnonymous] async (HttpContext http) =>
+            {
+                var body = await new StreamReader(http.Request.Body).ReadToEndAsync();
+                requestData rData = JsonSerializer.Deserialize<requestData>(body);
+                if (rData.eventID == "1023") // Get a playlist song
+                    await http.Response.WriteAsJsonAsync(await playlistSongs.GetSongFromPlaylist(rData));
+            });
 
             //Endponits for get user details
-            endpoints.MapPost("/users",
+            endpoints.MapPost("/getallusers",
             [AllowAnonymous] async (HttpContext http) =>
             {
                 var body = await new StreamReader(http.Request.Body).ReadToEndAsync();

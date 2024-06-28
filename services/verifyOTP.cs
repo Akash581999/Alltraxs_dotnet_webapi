@@ -11,7 +11,7 @@ namespace dotnetApi.services
     {
         private readonly dbServices db = new dbServices();
         private readonly Dictionary<string, string> jwt_config = new Dictionary<string, string>();
-        IConfiguration appsettings = new ConfigurationBuilder().AddJsonFile("appsettings.json").Build();
+        readonly IConfiguration appsettings = new ConfigurationBuilder().AddJsonFile("appsettings.json").Build();
         public async Task<responseData> VerifyOTP(requestData req)
         {
             responseData resData = new responseData();
