@@ -20,35 +20,46 @@ namespace COMMON_PROJECT_STRUCTURE_API.services
             resData.rData["rCode"] = 0;
             try
             {
-                MySqlParameter[] myParam = new MySqlParameter[]
+                string title = rData.addInfo["title"].ToString();
+                string artist = rData.addInfo["artist"].ToString();
+                string album = rData.addInfo["album"].ToString();
+                string genre = rData.addInfo["genre"].ToString();
+                string duration = rData.addInfo["duration"].ToString();
+                string popularity = rData.addInfo["popularity"].ToString();
+                string songUrl = rData.addInfo["songUrl"].ToString();
+                string songPic = rData.addInfo["songPic"].ToString();
+
+                MySqlParameter[] checkParams = new MySqlParameter[]
                 {
-                    new MySqlParameter("@title", rData.addInfo["title"])
+                    new MySqlParameter("@title", title)
                 };
 
-                var query = @"SELECT * FROM pc_student.Alltraxs_Songs WHERE title=@title;";
-                var dbData = ds.ExecuteSQLName(query, myParam);
-                if (dbData[0].Count() != 0)
+                var checkQuery = @"SELECT * FROM pc_student.Alltraxs_Songs WHERE title = @title;";
+                var dbCheckData = ds.ExecuteSQLName(checkQuery, checkParams);
+                if (dbCheckData[0].Count() != 0)
                 {
                     resData.rData["rCode"] = 2;
-                    resData.rData["rMessage"] = "Song with this name already exists!";
+                    resData.rData["rMessage"] = "Song with this title already exists!";
                 }
                 else
                 {
-                    var insertQuery = @"INSERT INTO pc_student.Alltraxs_Songs(title, artist, album, genre, duration, popularity, songUrl, songPic) 
-                                       VALUES (@title, @artist, @album, @genre, @duration, @popularity, @songUrl, @songPic);";
+                    var insertQuery = @"INSERT INTO pc_student.Alltraxs_Songs (title, artist, album, genre, duration, popularity, songUrl, songPic) 
+                                        VALUES (@title, @artist, @album, @genre, @duration, @popularity, @songUrl, @songPic);";
+
                     MySqlParameter[] insertParams = new MySqlParameter[]
                     {
-                        new MySqlParameter("@title", rData.addInfo["title"]),
-                        new MySqlParameter("@artist", rData.addInfo["artist"]),
-                        new MySqlParameter("@album", rData.addInfo["album"]),
-                        new MySqlParameter("@genre", rData.addInfo["genre"]),
-                        new MySqlParameter("@duration", rData.addInfo["duration"]),
-                        new MySqlParameter("@popularity", rData.addInfo["popularity"]),
-                        new MySqlParameter("@songUrl", rData.addInfo["songUrl"]),
-                        new MySqlParameter("@songPic", rData.addInfo["songPic"]),
+                        new MySqlParameter("@title", title),
+                        new MySqlParameter("@artist", artist),
+                        new MySqlParameter("@album", album),
+                        new MySqlParameter("@genre", genre),
+                        new MySqlParameter("@duration", duration),
+                        new MySqlParameter("@popularity", popularity),
+                        new MySqlParameter("@songUrl", songUrl),
+                        new MySqlParameter("@songPic", songPic),
                     };
 
                     int rowsAffected = ds.ExecuteInsertAndGetLastId(insertQuery, insertParams);
+
                     if (rowsAffected > 0)
                     {
                         resData.eventID = rData.eventID;
