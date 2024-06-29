@@ -141,7 +141,6 @@ namespace COMMON_PROJECT_STRUCTURE_API.services
                     new MySqlParameter("@album", rData.addInfo["album"]),
                     new MySqlParameter("@genre", rData.addInfo["genre"]),
                     new MySqlParameter("@duration", rData.addInfo["duration"]),
-                    new MySqlParameter("@popularity", rData.addInfo["popularity"]),
                     new MySqlParameter("@songUrl", rData.addInfo["songUrl"]),
                     new MySqlParameter("@songPic", rData.addInfo["songPic"]),
                     new MySqlParameter("@popularity", rData.addInfo["popularity"]),
@@ -157,7 +156,7 @@ namespace COMMON_PROJECT_STRUCTURE_API.services
                 else
                 {
                     var updatequery = @"UPDATE pc_student.Alltraxs_Songs
-                              SET title = @title, artist = @artist, album = @album, genre = @genre, duration = @duration, popularity = @popularity, songUrl = @songUrl, songPic = @songPic, popularity=@popularity
+                              SET title = @title, artist = @artist, album = @album, genre = @genre, duration = @duration, songUrl = @songUrl, songPic = @songPic, popularity=@popularity
                               WHERE SongId = @SongId;";
                     var updatedata = ds.ExecuteInsertAndGetLastId(updatequery, myParams);
                     if (updatedata != 0)
