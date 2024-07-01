@@ -159,7 +159,7 @@ namespace COMMON_PROJECT_STRUCTURE_API.services
                               SET title = @title, artist = @artist, album = @album, genre = @genre, duration = @duration, songUrl = @songUrl, songPic = @songPic, popularity=@popularity
                               WHERE SongId = @SongId;";
                     var updatedata = ds.ExecuteInsertAndGetLastId(updatequery, myParams);
-                    if (updatedata != 0)
+                    if (updatedata == 0)
                     {
                         resData.rData["rCode"] = 3;
                         resData.rData["rMessage"] = "Some error occured, couldn't update details!";

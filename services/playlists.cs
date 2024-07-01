@@ -24,7 +24,7 @@ namespace COMMON_PROJECT_STRUCTURE_API.services
                     new MySqlParameter("@Title", rData.addInfo["Title"]),
                     new MySqlParameter("@Description", rData.addInfo["Description"]),
                     new MySqlParameter("@PlaylistImageUrl", rData.addInfo["PlaylistImageUrl"]),
-                    new MySqlParameter("@IsPublic", rData.addInfo["IsPublic"]),
+                    new MySqlParameter("@Type", rData.addInfo["Type"]),
                 };
 
                 var query = @"SELECT * FROM pc_student.Alltraxs_Playlists WHERE Title=@Title;";
@@ -36,8 +36,8 @@ namespace COMMON_PROJECT_STRUCTURE_API.services
                 }
                 else
                 {
-                    var insertQuery = @"INSERT INTO pc_student.Alltraxs_Playlists(UserId, Title, Description, PlaylistImageUrl, IsPublic) 
-                                       VALUES (@UserId, @Title, @Description, @PlaylistImageUrl, @IsPublic);";
+                    var insertQuery = @"INSERT INTO pc_student.Alltraxs_Playlists(UserId, Title, Description, PlaylistImageUrl, Type) 
+                                       VALUES (@UserId, @Title, @Description, @PlaylistImageUrl, @Type);";
                     int rowsAffected = ds.ExecuteInsertAndGetLastId(insertQuery, myParam);
                     if (rowsAffected > 0)
                     {
@@ -118,7 +118,7 @@ namespace COMMON_PROJECT_STRUCTURE_API.services
                     new MySqlParameter("@Title", rData.addInfo["Title"]),
                     new MySqlParameter("@Description", rData.addInfo["Description"]),
                     new MySqlParameter("@PlaylistImageUrl", rData.addInfo["PlaylistImageUrl"]),
-                    new MySqlParameter("@IsPublic", rData.addInfo["IsPublic"]),
+                    new MySqlParameter("@Type", rData.addInfo["Type"]),
                     new MySqlParameter("@NumSongs", rData.addInfo["NumSongs"])
                 };
                 var query = @"SELECT * FROM pc_student.Alltraxs_Playlists WHERE Playlist_Id=@Playlist_Id;";
@@ -131,7 +131,7 @@ namespace COMMON_PROJECT_STRUCTURE_API.services
                 else
                 {
                     var updatequery = @"UPDATE pc_student.Alltraxs_Playlists
-                                        SET Title = @Title, Description = @Description, PlaylistImageUrl = @PlaylistImageUrl, IsPublic = @IsPublic, NumSongs=@NumSongs
+                                        SET Title = @Title, Description = @Description, PlaylistImageUrl = @PlaylistImageUrl, Type = @Type, NumSongs=@NumSongs
                                         WHERE Playlist_Id = @Playlist_Id;";
                     int rowsAffected = ds.ExecuteInsertAndGetLastId(updatequery, myParam);
                     if (rowsAffected != 0)
@@ -159,8 +159,8 @@ namespace COMMON_PROJECT_STRUCTURE_API.services
         public async Task<responseData> GetPlaylist(requestData req)
         {
             responseData resData = new responseData();
-            resData.eventID = req.eventID;
             resData.rData["rCode"] = 0;
+            resData.eventID = req.eventID;
             resData.rData["rMessage"] = "Playlist found successfully!";
             try
             {
@@ -191,7 +191,7 @@ namespace COMMON_PROJECT_STRUCTURE_API.services
                     resData.rData["Description"] = playlistdata[0][0]["Description"];
                     resData.rData["CreatedOn"] = playlistdata[0][0]["CreatedOn"];
                     resData.rData["PlaylistImageUrl"] = playlistdata[0][0]["PlaylistImageUrl"];
-                    resData.rData["IsPublic"] = playlistdata[0][0]["IsPublic"];
+                    resData.rData["Type"] = playlistdata[0][0]["Type"];
                     resData.rData["NumSongs"] = playlistdata[0][0]["NumSongs"];
                 }
             }
@@ -246,7 +246,7 @@ namespace COMMON_PROJECT_STRUCTURE_API.services
                                     Description = rowData.ElementAtOrDefault(3),
                                     CreatedOn = rowData.ElementAtOrDefault(4),
                                     PlaylistImageUrl = rowData.ElementAtOrDefault(5),
-                                    IsPublic = rowData.ElementAtOrDefault(6),
+                                    Type = rowData.ElementAtOrDefault(6),
                                     NumSongs = rowData.ElementAtOrDefault(7),
                                 };
                                 playlists.Add(playlistsdata);
