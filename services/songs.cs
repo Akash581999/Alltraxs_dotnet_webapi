@@ -20,18 +20,9 @@ namespace COMMON_PROJECT_STRUCTURE_API.services
             resData.rData["rCode"] = 0;
             try
             {
-                string title = rData.addInfo["title"].ToString();
-                string artist = rData.addInfo["artist"].ToString();
-                string album = rData.addInfo["album"].ToString();
-                string genre = rData.addInfo["genre"].ToString();
-                string duration = rData.addInfo["duration"].ToString();
-                string popularity = rData.addInfo["popularity"].ToString();
-                string songUrl = rData.addInfo["songUrl"].ToString();
-                string songPic = rData.addInfo["songPic"].ToString();
-
                 MySqlParameter[] checkParams = new MySqlParameter[]
                 {
-                    new MySqlParameter("@title", title)
+                    new MySqlParameter("@title", rData.addInfo["title"]),
                 };
 
                 var checkQuery = @"SELECT * FROM pc_student.Alltraxs_Songs WHERE title = @title;";
@@ -43,21 +34,19 @@ namespace COMMON_PROJECT_STRUCTURE_API.services
                 }
                 else
                 {
-                    var insertQuery = @"INSERT INTO pc_student.Alltraxs_Songs (title, artist, album, genre, duration, popularity, songUrl, songPic) 
-                                        VALUES (@title, @artist, @album, @genre, @duration, @popularity, @songUrl, @songPic);";
-
                     MySqlParameter[] insertParams = new MySqlParameter[]
                     {
-                        new MySqlParameter("@title", title),
-                        new MySqlParameter("@artist", artist),
-                        new MySqlParameter("@album", album),
-                        new MySqlParameter("@genre", genre),
-                        new MySqlParameter("@duration", duration),
-                        new MySqlParameter("@popularity", popularity),
-                        new MySqlParameter("@songUrl", songUrl),
-                        new MySqlParameter("@songPic", songPic),
+                        new MySqlParameter("@title", rData.addInfo["title"]),
+                        new MySqlParameter("@artist", rData.addInfo["artist"]),
+                        new MySqlParameter("@album", rData.addInfo["album"]),
+                        new MySqlParameter("@genre", rData.addInfo["genre"]),
+                        new MySqlParameter("@duration", rData.addInfo["duration"]),
+                        new MySqlParameter("@popularity", rData.addInfo["popularity"]),
+                        new MySqlParameter("@songUrl", rData.addInfo["songUrl"]),
+                        new MySqlParameter("@songPic", rData.addInfo["songPic"]),
                     };
-
+                    var insertQuery = @"INSERT INTO pc_student.Alltraxs_Songs (title, artist, album, genre, duration, popularity, songUrl, songPic) 
+                                        VALUES (@title, @artist, @album, @genre, @duration, @popularity, @songUrl, @songPic);";
                     int rowsAffected = ds.ExecuteInsertAndGetLastId(insertQuery, insertParams);
 
                     if (rowsAffected > 0)
@@ -133,21 +122,13 @@ namespace COMMON_PROJECT_STRUCTURE_API.services
             resData.rData["rCode"] = 0;
             try
             {
-                MySqlParameter[] myParams = new MySqlParameter[]
+                MySqlParameter[] checkParams = new MySqlParameter[]
                 {
                     new MySqlParameter("@SongId", rData.addInfo["SongId"]),
-                    new MySqlParameter("@title", rData.addInfo["title"]),
-                    new MySqlParameter("@artist", rData.addInfo["artist"]),
-                    new MySqlParameter("@album", rData.addInfo["album"]),
-                    new MySqlParameter("@genre", rData.addInfo["genre"]),
-                    new MySqlParameter("@duration", rData.addInfo["duration"]),
-                    new MySqlParameter("@songUrl", rData.addInfo["songUrl"]),
-                    new MySqlParameter("@songPic", rData.addInfo["songPic"]),
-                    new MySqlParameter("@popularity", rData.addInfo["popularity"]),
                 };
 
                 var query = @"SELECT * FROM pc_student.Alltraxs_Songs WHERE SongId=@SongId";
-                var dbData = ds.ExecuteSQLName(query, myParams);
+                var dbData = ds.ExecuteSQLName(query, checkParams);
                 if (dbData[0].Count() == 0)
                 {
                     resData.rData["rCode"] = 2;
@@ -155,11 +136,23 @@ namespace COMMON_PROJECT_STRUCTURE_API.services
                 }
                 else
                 {
+                    MySqlParameter[] updateParams = new MySqlParameter[]
+                   {
+                        new MySqlParameter("@SongId", rData.addInfo["SongId"]),
+                        new MySqlParameter("@title", rData.addInfo["title"]),
+                        new MySqlParameter("@artist", rData.addInfo["artist"]),
+                        new MySqlParameter("@album", rData.addInfo["album"]),
+                        new MySqlParameter("@genre", rData.addInfo["genre"]),
+                        new MySqlParameter("@duration", rData.addInfo["duration"]),
+                        new MySqlParameter("@popularity", rData.addInfo["popularity"]),
+                        new MySqlParameter("@songUrl", rData.addInfo["songUrl"]),
+                        new MySqlParameter("@songPic", rData.addInfo["songPic"]),
+                   };
                     var updatequery = @"UPDATE pc_student.Alltraxs_Songs
-                              SET title = @title, artist = @artist, album = @album, genre = @genre, duration = @duration, songUrl = @songUrl, songPic = @songPic, popularity=@popularity
-                              WHERE SongId = @SongId;";
-                    var updatedata = ds.ExecuteInsertAndGetLastId(updatequery, myParams);
-                    if (updatedata == 0)
+                                        SET title = @title, artist = @artist, album = @album, genre = @genre, duration = @duration, popularity=@popularity, songUrl = @songUrl, songPic = @songPic
+                                        WHERE SongId = @SongId;";
+                    var updatedata = ds.ExecuteInsertAndGetLastId(updatequery, updateParams);
+                    if (updatedata != 0)
                     {
                         resData.rData["rCode"] = 3;
                         resData.rData["rMessage"] = "Some error occured, couldn't update details!";
