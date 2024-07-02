@@ -222,7 +222,7 @@ WebHost.CreateDefaultBuilder(args)
                 if (rData.eventID == "1014") // Update playlist
                     await http.Response.WriteAsJsonAsync(await playlists.UpdatePlaylist(rData));
             });
-            endpoints.MapGet("/playlists/id",
+            endpoints.MapPost("/playlists/id",
             [AllowAnonymous] async (HttpContext http) =>
             {
                 var body = await new StreamReader(http.Request.Body).ReadToEndAsync();
@@ -291,6 +291,15 @@ WebHost.CreateDefaultBuilder(args)
                 requestData rData = JsonSerializer.Deserialize<requestData>(body);
                 if (rData.eventID == "1019") // Get user by Id
                     await http.Response.WriteAsJsonAsync(await users.GetUserById(rData));
+            });
+
+            endpoints.MapDelete("/users/id",
+            [AllowAnonymous] async (HttpContext http) =>
+            {
+                var body = await new StreamReader(http.Request.Body).ReadToEndAsync();
+                requestData rData = JsonSerializer.Deserialize<requestData>(body);
+                if (rData.eventID == "1025") // Delete user by Id
+                    await http.Response.WriteAsJsonAsync(await users.DeleteUserById(rData));
             });
 
             endpoints.MapGet("/bing",

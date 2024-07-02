@@ -25,6 +25,7 @@ namespace COMMON_PROJECT_STRUCTURE_API.services
                     new MySqlParameter("@Description", rData.addInfo["Description"]),
                     new MySqlParameter("@PlaylistImageUrl", rData.addInfo["PlaylistImageUrl"]),
                     new MySqlParameter("@Type", rData.addInfo["Type"]),
+                    new MySqlParameter("@NumSongs", rData.addInfo["NumSongs"]),
                 };
 
                 var query = @"SELECT * FROM pc_student.Alltraxs_Playlists WHERE Title=@Title;";
@@ -36,8 +37,8 @@ namespace COMMON_PROJECT_STRUCTURE_API.services
                 }
                 else
                 {
-                    var insertQuery = @"INSERT INTO pc_student.Alltraxs_Playlists(UserId, Title, Description, PlaylistImageUrl, Type) 
-                                       VALUES (@UserId, @Title, @Description, @PlaylistImageUrl, @Type);";
+                    var insertQuery = @"INSERT INTO pc_student.Alltraxs_Playlists(UserId, Title, Description, PlaylistImageUrl, Type, NumSongs) 
+                                       VALUES (@UserId, @Title, @Description, @PlaylistImageUrl, @Type, @NumSongs);";
                     int rowsAffected = ds.ExecuteInsertAndGetLastId(insertQuery, myParam);
                     if (rowsAffected > 0)
                     {

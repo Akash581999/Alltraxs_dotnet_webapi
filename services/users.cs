@@ -119,6 +119,51 @@ namespace COMMON_PROJECT_STRUCTURE_API.services
             }
             return resData;
         }
+        public async Task<responseData> DeleteUserById(requestData req)
+        {
+            responseData resData = new responseData();
+            resData.rData["rCode"] = 0;
+            try
+            {
+                MySqlParameter[] para = new MySqlParameter[]
+                {
+                    new MySqlParameter("@UserId", req.addInfo["UserId"].ToString()),
+                    new MySqlParameter("@Email", req.addInfo["Email"].ToString())
+                };
+
+                var checkSql = $"SELECT * FROM pc_student.Alltraxs_users WHERE UserId=@UserId OR Email = @Email;";
+                var checkResult = ds.executeSQL(checkSql, para);
+
+                if (checkResult[0].Count() == 0)
+                {
+                    resData.rData["rCode"] = 2;
+                    resData.rData["rMessage"] = "User not found, No records deleted!";
+                }
+                else
+                {
+                    var deleteSql = @"DELETE FROM pc_student.Alltraxs_users WHERE UserId = @UserId OR Email = @Email;";
+                    var rowsAffected = ds.ExecuteInsertAndGetLastId(deleteSql, para);
+                    if (rowsAffected == 0)
+                    {
+                        resData.rData["rCode"] = 3;
+                        resData.rData["rMessage"] = "Some error occurred, User not deleted!";
+                    }
+                    else
+                    {
+                        resData.eventID = req.eventID;
+                        resData.rData["rCode"] = 0;
+                        resData.rData["rMessage"] = "User deleted successfully";
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                resData.rStatus = 402;
+                resData.rData["rCode"] = 1;
+                resData.rData["rMessage"] = $"Error: {ex.Message}";
+            }
+            return resData;
+        }
 
         // public bool CheckPhoneNumberExists(string phoneNumber)
         // {
