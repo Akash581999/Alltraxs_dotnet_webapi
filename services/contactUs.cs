@@ -59,6 +59,52 @@ namespace COMMON_PROJECT_STRUCTURE_API.services
             return resData;
         }
 
+        public async Task<responseData> DeleteFeedbackById(requestData req)
+        {
+            responseData resData = new responseData();
+            resData.rData["rCode"] = 0;
+            try
+            {
+                MySqlParameter[] para = new MySqlParameter[]
+                {
+                    new MySqlParameter("@Feedback_Id", req.addInfo["Feedback_Id"].ToString()),
+                    // new MySqlParameter("@Email", req.addInfo["Email"].ToString())
+                };
+
+                var checkSql = $"SELECT * FROM pc_student.Alltraxs_ContactUs WHERE Feedback_Id=@Feedback_Id;";
+                var checkResult = ds.executeSQL(checkSql, para);
+
+                if (checkResult[0].Count() == 0)
+                {
+                    resData.rData["rCode"] = 2;
+                    resData.rData["rMessage"] = "Feedback not found, No records deleted!";
+                }
+                else
+                {
+                    var deleteSql = @"DELETE FROM pc_student.Alltraxs_ContactUs WHERE Feedback_Id = @Feedback_Id;";
+                    var rowsAffected = ds.ExecuteInsertAndGetLastId(deleteSql, para);
+                    if (rowsAffected == 0)
+                    {
+                        resData.eventID = req.eventID;
+                        resData.rData["rCode"] = 0;
+                        resData.rData["rMessage"] = "Feedback deleted successfully";
+                    }
+                    else
+                    {
+                        resData.rData["rCode"] = 3;
+                        resData.rData["rMessage"] = "Some error occurred, Feedback not deleted!";
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                resData.rStatus = 402;
+                resData.rData["rCode"] = 1;
+                resData.rData["rMessage"] = $"Error: {ex.Message}";
+            }
+            return resData;
+        }
+
         public async Task<responseData> GetAllFeedbacks(requestData req)
         {
             responseData resData = new responseData();

@@ -151,8 +151,16 @@ WebHost.CreateDefaultBuilder(args)
             {
                 var body = await new StreamReader(http.Request.Body).ReadToEndAsync();
                 requestData rData = JsonSerializer.Deserialize<requestData>(body);
-                if (rData.eventID == "1024") // Feedbacks
+                if (rData.eventID == "1024") // All Feedbacks
                     await http.Response.WriteAsJsonAsync(await contactUs.GetAllFeedbacks(rData));
+            });
+            endpoints.MapDelete("/feedback/id",
+            [AllowAnonymous] async (HttpContext http) =>
+            {
+                var body = await new StreamReader(http.Request.Body).ReadToEndAsync();
+                requestData rData = JsonSerializer.Deserialize<requestData>(body);
+                if (rData.eventID == "1026") // Delete Feedback
+                    await http.Response.WriteAsJsonAsync(await contactUs.DeleteFeedbackById(rData));
             });
 
             //Endponits for songs
