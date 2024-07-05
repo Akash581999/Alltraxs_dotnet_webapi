@@ -21,7 +21,7 @@ namespace COMMON_PROJECT_STRUCTURE_API.services
             resData.eventID = req.eventID;
             try
             {
-                var query = @"SELECT * FROM pc_student.Alltraxs_users ORDER BY UserId ASC";
+                var query = @"SELECT * FROM pc_student.Alltraxs_users WHERE Role = 'User' ORDER BY UserId ASC;";
                 var dbData = ds.executeSQL(query, null);
                 if (dbData == null)
                 {
