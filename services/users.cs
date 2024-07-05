@@ -127,11 +127,11 @@ namespace COMMON_PROJECT_STRUCTURE_API.services
             {
                 MySqlParameter[] para = new MySqlParameter[]
                 {
-                    new MySqlParameter("@UserId", req.addInfo["UserId"].ToString()),
+                    // new MySqlParameter("@UserId", req.addInfo["UserId"].ToString()),
                     new MySqlParameter("@Email", req.addInfo["Email"].ToString())
                 };
 
-                var checkSql = $"SELECT * FROM pc_student.Alltraxs_users WHERE UserId=@UserId OR Email = @Email;";
+                var checkSql = $"SELECT * FROM pc_student.Alltraxs_users WHERE Email = @Email;";
                 var checkResult = ds.executeSQL(checkSql, para);
 
                 if (checkResult[0].Count() == 0)
@@ -141,7 +141,7 @@ namespace COMMON_PROJECT_STRUCTURE_API.services
                 }
                 else
                 {
-                    var deleteSql = @"DELETE FROM pc_student.Alltraxs_users WHERE UserId = @UserId OR Email = @Email;";
+                    var deleteSql = @"DELETE FROM pc_student.Alltraxs_users WHERE Email = @Email;";
                     var rowsAffected = ds.ExecuteInsertAndGetLastId(deleteSql, para);
                     if (rowsAffected == 0)
                     {
@@ -164,26 +164,5 @@ namespace COMMON_PROJECT_STRUCTURE_API.services
             }
             return resData;
         }
-
-        // public bool CheckPhoneNumberExists(string phoneNumber)
-        // {
-        //     try
-        //     {
-        //         using (MySqlConnection connection = new MySqlConnection("server=210.210.210.50;user=test_user;password=test*123;port=2020;database=pc_student;"))
-        //         {
-        //             connection.Open();
-        //             string query = "SELECT COUNT(*) FROM Kapil_signup WHERE phone = @phone";
-        //             MySqlCommand command = new MySqlCommand(query, connection);
-        //             command.Parameters.AddWithValue("@phone", phoneNumber);
-        //             int count = Convert.ToInt32(command.ExecuteScalar());
-        //             return count > 0;
-        //         }
-        //     }
-        //     catch (Exception ex)
-        //     {
-        //         Console.WriteLine("Error while executing query: " + ex.Message);
-        //         return false;
-        //     }
-        // }
     }
 }

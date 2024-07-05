@@ -2,8 +2,10 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using System.Text.RegularExpressions;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using MySql.Data.MySqlClient;
+using Org.BouncyCastle.Ocsp;
 
 namespace COMMON_PROJECT_STRUCTURE_API.services
 {
@@ -11,12 +13,9 @@ namespace COMMON_PROJECT_STRUCTURE_API.services
     {
         dbServices ds = new dbServices();
         decryptService cm = new decryptService();
-
         private readonly Dictionary<string, string> jwt_config = new Dictionary<string, string>();
         private readonly Dictionary<string, string> _service_config = new Dictionary<string, string>();
-
         IConfiguration appsettings = new ConfigurationBuilder().AddJsonFile("appsettings.json").Build();
-
         public login()
         {
             jwt_config["Key"] = appsettings["jwt_config:Key"].ToString();
@@ -65,9 +64,19 @@ namespace COMMON_PROJECT_STRUCTURE_API.services
                 }
                 else
                 {
+                    var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwt_config["Key"]));
+                    var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
+                    var Sectoken = new JwtSecurityToken(jwt_config["Issuer"],
+                      jwt_config["Issuer"],
+                      null,
+                      expires: DateTime.Now.AddMinutes(120),
+                      signingCredentials: credentials);
+                    var token = new JwtSecurityTokenHandler().WriteToken(Sectoken);
+
                     resData.eventID = req.eventID;
                     resData.rData["rCode"] = 0;
                     resData.rData["rMessage"] = "Login Successfully, Welcome!";
+                    resData.rData["rCode"] = token;
                 }
             }
             catch (Exception ex)
