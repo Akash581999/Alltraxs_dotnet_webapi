@@ -14,7 +14,7 @@ namespace COMMON_PROJECT_STRUCTURE_API.services
         dbServices ds = new dbServices();
         decryptService cm = new decryptService();
         private readonly Dictionary<string, string> jwt_config = new Dictionary<string, string>();
-        private readonly Dictionary<string, string> _service_config = new Dictionary<string, string>();
+        private readonly Dictionary<string, string> service_config = new Dictionary<string, string>();
         IConfiguration appsettings = new ConfigurationBuilder().AddJsonFile("appsettings.json").Build();
         public login()
         {
@@ -50,11 +50,11 @@ namespace COMMON_PROJECT_STRUCTURE_API.services
 
                 MySqlParameter[] myParams = new MySqlParameter[] {
                 new MySqlParameter("@UserId", input),
-                new MySqlParameter("@roleId", 1),
+                new MySqlParameter("@Role", req.addInfo["Role"].ToString()),
                 new MySqlParameter("@UserPassword", req.addInfo["UserPassword"].ToString())
                 };
 
-                var sq = $"SELECT * FROM pc_student.Alltraxs_users WHERE {columnName} = @UserId AND UserPassword = @UserPassword";
+                var sq = $"SELECT * FROM pc_student.Alltraxs_users WHERE Role=@Role AND {columnName} = @UserId AND UserPassword = @UserPassword;";
                 var data = ds.ExecuteSQLName(sq, myParams);
 
                 if (data == null || data[0].Count() == 0)

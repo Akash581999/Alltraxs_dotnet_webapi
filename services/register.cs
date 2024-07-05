@@ -23,6 +23,7 @@ namespace COMMON_PROJECT_STRUCTURE_API.services
             {
                 MySqlParameter[] para = new MySqlParameter[]
                 {
+                    new MySqlParameter("@Role", req.addInfo["Role"].ToString()),
                     new MySqlParameter("@FirstName", req.addInfo["FirstName"].ToString()),
                     new MySqlParameter("@LastName", req.addInfo["LastName"].ToString()),
                     new MySqlParameter("@Email", req.addInfo["Email"].ToString()),
@@ -30,24 +31,24 @@ namespace COMMON_PROJECT_STRUCTURE_API.services
                     new MySqlParameter("@UserPassword", req.addInfo["UserPassword"].ToString())
                 };
 
-                var checkSql = $"SELECT * FROM pc_student.Alltraxs_users WHERE Mobile=@Mobile OR Email=@Email;";
+                var checkSql = $"SELECT * FROM pc_student.Alltraxs_users WHERE Role=@Role AND Email=@Email AND Mobile=@Mobile;";
                 var checkResult = ds.executeSQL(checkSql, para);
 
                 if (checkResult[0].Count() != 0)
                 {
                     resData.rData["rCode"] = 2;
-                    resData.rData["rMessage"] = "User already registered, Try Login in!!";
+                    resData.rData["rMessage"] = "Already registered, Try Login in!!";
                 }
                 else
                 {
-                    var insertSql = @"INSERT INTO pc_student.Alltraxs_users (FirstName, LastName, Email, Mobile, UserPassword) 
-                                      VALUES(@FirstName, @LastName, @Email, @Mobile, @UserPassword);";
+                    var insertSql = @"INSERT INTO pc_student.Alltraxs_users (Role, FirstName, LastName, Email, Mobile, UserPassword) 
+                                      VALUES(@Role, @FirstName, @LastName, @Email, @Mobile, @UserPassword);";
                     var insertId = ds.ExecuteInsertAndGetLastId(insertSql, para);
                     if (insertId != 0)
                     {
                         resData.eventID = req.eventID;
                         resData.rData["rCode"] = 0;
-                        resData.rData["rMessage"] = "User registered successfully!";
+                        resData.rData["rMessage"] = "Registered successfully!";
                     }
                     else
                     {
