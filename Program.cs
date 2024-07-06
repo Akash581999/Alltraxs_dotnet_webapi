@@ -26,6 +26,7 @@ WebHost.CreateDefaultBuilder(args)
         services.AddSingleton<playlists>();
         services.AddSingleton<playlistSongs>();
         services.AddSingleton<users>();
+        services.AddSingleton<subscriptions>();
 
         services.AddAuthorization();
         services.AddControllers();
@@ -63,6 +64,7 @@ WebHost.CreateDefaultBuilder(args)
             var playlists = endpoints.ServiceProvider.GetRequiredService<playlists>();
             var playlistSongs = endpoints.ServiceProvider.GetRequiredService<playlistSongs>();
             var users = endpoints.ServiceProvider.GetRequiredService<users>();
+            var subscriptions = endpoints.ServiceProvider.GetRequiredService<subscriptions>();
 
             endpoints.MapPost("/login",
             [AllowAnonymous] async (HttpContext http) =>
@@ -263,7 +265,7 @@ WebHost.CreateDefaultBuilder(args)
                     await http.Response.WriteAsJsonAsync(await playlistSongs.GetSongFromPlaylist(rData));
             });
 
-            //Endponits for get user details
+            //Endponits for user details
             endpoints.MapPost("/getallusers",
             [AllowAnonymous] async (HttpContext http) =>
             {
@@ -289,6 +291,52 @@ WebHost.CreateDefaultBuilder(args)
                 requestData rData = JsonSerializer.Deserialize<requestData>(body);
                 if (rData.eventID == "1025") // Delete user by Id
                     await http.Response.WriteAsJsonAsync(await users.DeleteUserById(rData));
+            });
+
+            //Endponits for subscriptions details   
+            endpoints.MapPost("/subscription",
+            [AllowAnonymous] async (HttpContext http) =>
+            {
+                var body = await new StreamReader(http.Request.Body).ReadToEndAsync();
+                requestData rData = JsonSerializer.Deserialize<requestData>(body);
+                if (rData.eventID == "1027") // Create new subscription
+                    await http.Response.WriteAsJsonAsync(await subscriptions.CreateSubscription(rData));
+            });
+
+            endpoints.MapPost("/subscriptions/id",
+            [AllowAnonymous] async (HttpContext http) =>
+            {
+                var body = await new StreamReader(http.Request.Body).ReadToEndAsync();
+                requestData rData = JsonSerializer.Deserialize<requestData>(body);
+                if (rData.eventID == "1028") // Get subscription by Id
+                    await http.Response.WriteAsJsonAsync(await subscriptions.GetSubscriptionById(rData));
+            });
+
+            endpoints.MapPut("/subscriptions/id",
+            [AllowAnonymous] async (HttpContext http) =>
+            {
+                var body = await new StreamReader(http.Request.Body).ReadToEndAsync();
+                requestData rData = JsonSerializer.Deserialize<requestData>(body);
+                if (rData.eventID == "1029") // Edit subscription by Id
+                    await http.Response.WriteAsJsonAsync(await subscriptions.EditSubscriptionById(rData));
+            });
+
+            endpoints.MapDelete("/subscriptions/id",
+            [AllowAnonymous] async (HttpContext http) =>
+            {
+                var body = await new StreamReader(http.Request.Body).ReadToEndAsync();
+                requestData rData = JsonSerializer.Deserialize<requestData>(body);
+                if (rData.eventID == "1030") // Cancel subscription by Id
+                    await http.Response.WriteAsJsonAsync(await subscriptions.CancelSubscriptionById(rData));
+            });
+
+            endpoints.MapPost("/allsubscriptions",
+            [AllowAnonymous] async (HttpContext http) =>
+            {
+                var body = await new StreamReader(http.Request.Body).ReadToEndAsync();
+                requestData rData = JsonSerializer.Deserialize<requestData>(body);
+                if (rData.eventID == "1031") // Get all subscriptions
+                    await http.Response.WriteAsJsonAsync(await subscriptions.GetAllSubscriptions(rData));
             });
 
             endpoints.MapGet("/bing",
