@@ -177,7 +177,6 @@ namespace COMMON_PROJECT_STRUCTURE_API.services
             {
                 MySqlParameter[] myParam = new MySqlParameter[]
                 {
-                    // new MySqlParameter("@SubscriptionId", rData.addInfo["SubscriptionId"]),
                     new MySqlParameter("@UserId", rData.addInfo["UserId"]),
                     new MySqlParameter("@UserName", rData.addInfo["UserName"]),
                     new MySqlParameter("@Email", rData.addInfo["Email"]),
@@ -185,32 +184,36 @@ namespace COMMON_PROJECT_STRUCTURE_API.services
                     new MySqlParameter("@CouponCode", rData.addInfo["CouponCode"]),
                     new MySqlParameter("@PaymentDate", rData.addInfo["PaymentDate"]),
                     new MySqlParameter("@StartDate", rData.addInfo["StartDate"]),
-                    // new MySqlParameter("@EndDate", rData.addInfo["EndDate"]),
-                    // new MySqlParameter("@LastUpdated", rData.addInfo["LastUpdated"]),
+                    new MySqlParameter("@EndDate", rData.addInfo["EndDate"]),
                 };
 
-                var query = @"SELECT * FROM pc_student.Alltraxs_Subscriptions WHERE Email=@Email;";
+                var query = @"SELECT * FROM pc_student.Alltraxs_users WHERE Email=@Email;";
                 var dbData = ds.ExecuteSQLName(query, myParam);
-                if (dbData[0].Count() != 0)
+                if (dbData[0].Count() == 0)
                 {
                     resData.rData["rCode"] = 2;
-                    resData.rData["rMessage"] = "Subscription with this Email already exists!";
+                    resData.rData["rMessage"] = "User dont exists, please register first!";
                 }
                 else
                 {
-                    var insertQuery = @"INSERT INTO pc_student.Alltraxs_Subscriptions(UserId, UserName, Email, PlanType, CouponCode, PaymentDate, StartDate) 
-                                       VALUES (@UserId, @UserName, @Email, @PlanType, @CouponCode, @PaymentDate, @StartDate);";
+                    var insertQuery = @"INSERT INTO pc_student.Alltraxs_Subscriptions(UserId, UserName, Email, PlanType, CouponCode, PaymentDate, StartDate, EndDate) 
+                                       VALUES (@UserId, @UserName, @Email, @PlanType, @CouponCode, @PaymentDate, @StartDate, @EndDate);";
                     int rowsAffected = ds.ExecuteInsertAndGetLastId(insertQuery, myParam);
-                    if (rowsAffected > 0)
+                    if (rowsAffected != 0)
                     {
                         resData.eventID = rData.eventID;
                         resData.rData["rCode"] = 0;
-                        resData.rData["rMessage"] = "Subscription created successfully.";
+                        resData.rData["rMessage"] = "User subscription added successfully.";
+                    }
+                    else if (rowsAffected == 0)
+                    {
+                        resData.rData["rCode"] = 3;
+                        resData.rData["rMessage"] = "Failed to add subscription!";
                     }
                     else
                     {
-                        resData.rData["rCode"] = 3;
-                        resData.rData["rMessage"] = "Failed to created Subscription!";
+                        resData.rData["rCode"] = 4;
+                        resData.rData["rMessage"] = "Subscription is still active, Failed to renew!";
                     }
                 }
             }
@@ -218,7 +221,7 @@ namespace COMMON_PROJECT_STRUCTURE_API.services
             {
                 resData.rStatus = 402;
                 resData.rData["rCode"] = 1;
-                resData.rData["rMessage"] = $"Error: {ex.Message}";
+                resData.rData["rMessage"] = $"User already have active subscription!: {ex.Message}, Failed to renew!";
             }
             return resData;
         }
