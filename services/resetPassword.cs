@@ -15,32 +15,32 @@ namespace COMMON_PROJECT_STRUCTURE_API.services
             resData.rData["rCode"] = 0;
             try
             {
-                string UserId = req.addInfo["UserId"].ToString();
+                string Mobile = req.addInfo["Mobile"].ToString();
                 string NewPassword = req.addInfo["NewPassword"].ToString();
                 string ConfirmPassword = req.addInfo["ConfirmPassword"].ToString();
 
                 var para = new MySqlParameter[]
                 {
-                    new MySqlParameter("@UserId", UserId),
+                    new MySqlParameter("@Mobile", Mobile),
                     new MySqlParameter("@NewPassword", NewPassword)
                 };
 
-                var selectSql = $"SELECT * FROM pc_student.Alltraxs_users WHERE UserId = @UserId;";
+                var selectSql = $"SELECT * FROM pc_student.Alltraxs_users WHERE Mobile = @Mobile;";
                 var data = ds.ExecuteSQLName(selectSql, para);
                 if (data == null || data[0].Count() == 0)
                 {
                     resData.rData["rCode"] = 2;
-                    resData.rData["rMessage"] = "UserId not found, Please enter a valid UserId";
+                    resData.rData["rMessage"] = "Phone number not found, Please enter a valid number";
                 }
                 else
                 {
                     if (NewPassword == ConfirmPassword)
                     {
-                        var updateSql = $"UPDATE pc_student.Alltraxs_users SET UserPassword = @NewPassword WHERE UserId = @UserId;";
+                        var updateSql = $"UPDATE pc_student.Alltraxs_users SET UserPassword = @NewPassword WHERE Mobile = @Mobile;";
                         var rowsAffected = ds.ExecuteInsertAndGetLastId(updateSql, para);
                         if (rowsAffected == 0)
                         {
-                            selectSql = $"SELECT * FROM pc_student.Alltraxs_users WHERE UserId = @UserId AND UserPassword=@NewPassword;";
+                            selectSql = $"SELECT * FROM pc_student.Alltraxs_users WHERE Mobile = @Mobile AND UserPassword=@NewPassword;";
                             data = ds.ExecuteSQLName(selectSql, para);
                             if (data[0].Count() == 0)
                             {
@@ -63,7 +63,7 @@ namespace COMMON_PROJECT_STRUCTURE_API.services
                     else
                     {
                         resData.rData["rCode"] = 2;
-                        resData.rData["rMessage"] = "New password and confirm password must be same!";
+                        resData.rData["rMessage"] = "New password and confirm password match!";
                     }
                 }
             }

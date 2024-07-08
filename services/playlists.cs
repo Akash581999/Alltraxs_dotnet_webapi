@@ -70,11 +70,11 @@ namespace COMMON_PROJECT_STRUCTURE_API.services
             {
                 MySqlParameter[] myParam = new MySqlParameter[]
                 {
-                    new MySqlParameter("@Playlist_Id", rData.addInfo["Playlist_Id"].ToString()),
+                    // new MySqlParameter("@Playlist_Id", rData.addInfo["Playlist_Id"].ToString()),
                     new MySqlParameter("@Title", rData.addInfo["Title"].ToString())
                 };
 
-                var query = @"SELECT * FROM pc_student.Alltraxs_Playlists WHERE Title=@Title AND Playlist_Id=@Playlist_Id;";
+                var query = @"SELECT * FROM pc_student.Alltraxs_Playlists WHERE Title=@Title;";
                 var dbData = ds.ExecuteSQLName(query, myParam);
                 if (dbData[0].Count() == 0)
                 {
@@ -85,7 +85,7 @@ namespace COMMON_PROJECT_STRUCTURE_API.services
                 {
                     var delquery = $"DELETE FROM pc_student.Alltraxs_Playlists WHERE Title = @Title;";
                     int rowsAffected = ds.ExecuteInsertAndGetLastId(delquery, myParam);
-                    if (rowsAffected == 0)
+                    if (rowsAffected != 0)
                     {
                         resData.rData["rCode"] = 3;
                         resData.rData["rMessage"] = "Some error occurred, could'nt delete playlist!";
