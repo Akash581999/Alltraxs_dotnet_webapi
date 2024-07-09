@@ -79,11 +79,11 @@ namespace COMMON_PROJECT_STRUCTURE_API.services
             {
                 MySqlParameter[] para = new MySqlParameter[]
                 {
-                    new MySqlParameter("@SongId", rData.addInfo["SongId"].ToString()),
+                    // new MySqlParameter("@SongId", rData.addInfo["SongId"].ToString()),
                     new MySqlParameter("@title", rData.addInfo["title"].ToString())
                 };
 
-                var query = @"SELECT * FROM pc_student.Alltraxs_Songs WHERE SongId=@SongId AND title=@title;";
+                var query = @"SELECT * FROM pc_student.Alltraxs_Songs WHERE title=@title;";
                 var dbData = ds.ExecuteSQLName(query, para);
                 if (dbData[0].Count() == 0)
                 {
@@ -92,18 +92,18 @@ namespace COMMON_PROJECT_STRUCTURE_API.services
                 }
                 else
                 {
-                    var deleteSql = $"DELETE FROM pc_student.Alltraxs_Songs WHERE SongId = @SongId";
+                    var deleteSql = $"DELETE FROM pc_student.Alltraxs_Songs WHERE title = @title";
                     var rowsAffected = ds.ExecuteInsertAndGetLastId(deleteSql, para);
                     if (rowsAffected == 0)
-                    {
-                        resData.rData["rCode"] = 2;
-                        resData.rData["rMessage"] = "Song couldn't deleted!";
-                    }
-                    else
                     {
                         resData.eventID = rData.eventID;
                         resData.rData["rCode"] = 0;
                         resData.rData["rMessage"] = "Song deleted successfully.";
+                    }
+                    else
+                    {
+                        resData.rData["rCode"] = 2;
+                        resData.rData["rMessage"] = "Song couldn't deleted!";
                     }
                 }
             }
